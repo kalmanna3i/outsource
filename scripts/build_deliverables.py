@@ -58,115 +58,25 @@ def img_tag(key: str, alt: str, max_width: str = "100%") -> str:
 
 
 def build_report() -> str:
-    return f"""<!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"/>
-<title>OUTSOURCE — MGT 409 Report — Kay Al Mannai</title>
-<style>
-@page{{size:letter;margin:0.75in}}
-body{{font-family:"Source Sans 3",Segoe UI,sans-serif;color:#1A2430;background:#F7F3EC;line-height:1.5;max-width:7.2in;margin:0 auto;padding:0.75in}}
-h1,h2,h3{{font-family:Georgia,serif;color:#0B1F33}}
-h2{{border-bottom:2px solid #3F6F7A;padding-bottom:.2rem;margin-top:1.6rem;page-break-after:avoid}}
-table{{width:100%;border-collapse:collapse;font-size:.9rem;margin:.6rem 0}}
-th,td{{border:1px solid #D9D2C5;padding:.35rem .45rem;text-align:left}}
-th{{background:#E8EEF0}}
-.shot{{margin:.7rem 0;page-break-inside:avoid}}
-.shot img{{display:block;width:100%;height:auto}}
-pre{{background:#0B1F33;color:#F7F3EC;padding:.6rem;font-size:.75rem;overflow:auto}}
-.callout{{background:#EAF1F2;border-left:4px solid #3F6F7A;padding:.6rem .8rem;margin:.7rem 0}}
-.warn{{background:#F3E8DA;border-left:4px solid #8A5A2B;padding:.6rem .8rem}}
-.pagebreak{{page-break-before:always}}
-.small{{font-size:.85rem;color:#5C6B7A}}
-</style></head><body>
+    import importlib.util
+    import sys
 
-<h1>OUTSOURCE</h1>
-<p><strong>Personal Strategy &amp; Execution Office</strong> · Kay Al Mannai · Yale MGT 409 · November 23, 2026</p>
-<p><strong>Public repo:</strong> <a href="{REPO}">{REPO}</a><br/>
-App: run locally with <code>streamlit run app.py</code> (no hosted link).<br/>
-One sentence: OUTSOURCE decides what deserves your attention, executes AI-eligible work, and prepares the exact human moment when automation cannot continue.</p>
-
-<h2>2. Motivation</h2>
-<p>Kay Al Mannai (MBA candidate) faces evenings where an academic hard deadline, a fixed wedding, a work stakeholder update, and an insurance portal compete for the same hours. Today: calendar apps ignore goal weights; generic chatbots draft text but hallucinate completed calls; task lists do not produce a private brief plus a public ICS when identity verification blocks automation.</p>
-<p>Cost: misallocated attention (polishing low-leverage email while a non-movable obligation approaches), rework after “the AI said it called the insurer,” and sensitive claim details pasted into calendar invites.</p>
-
-<h2>3. What is new here</h2>
-<table><tr><th>Existing</th><th>What they do</th><th>Gap OUTSOURCE addresses</th></tr>
-<tr><td><strong>Lindy</strong></td><td>AI assistants for workflow automation</td><td>Not grounded in personal life-goal tradeoffs or human-only insurer gates with ICS handoff</td></tr>
-<tr><td><strong>Motion</strong> / <strong>Reclaim</strong></td><td>Calendar autopilot for focus time</td><td>Optimize free/busy, not opportunity cost across relationship vs academic vs financial goals</td></tr>
-<tr><td><strong>Duckbill</strong></td><td>Human+AI concierge for tasks</td><td>Humans-in-the-loop as a service; not a transparent multi-agent plan you can audit locally</td></tr>
-<tr><td><strong>ChatGPT agents</strong></td><td>General agents + tools</td><td>Risk inventing completed external actions; no dedicated REVIEW_ALL gate or labeled demo insurer fixture</td></tr></table>
-<p>OUTSOURCE’s twist: a <strong>strategy-aware execution office</strong> with honest simulation boundaries, separate private intervention briefs from public calendar text, and resume-after-result orchestration.</p>
-
-<h2>4. The agents</h2>
-<div class="shot">{ARCH_SVG}</div>
-<table><tr><th>Agent</th><th>Role</th><th>Tools / outputs</th><th>Model</th></tr>
-<tr><td>A01</td><td>Chief of Staff</td><td>Structured intake JSON</td><td>gpt-6-luna (Portkey) or OPENAI_MODEL when live</td></tr>
-<tr><td>A02</td><td>Life Strategy</td><td>Reads SQLite Life Blueprint goals</td><td>same</td></tr>
-<tr><td>B01</td><td>Opportunity Cost</td><td>Options, tradeoffs, sequence</td><td>same</td></tr>
-<tr><td>F02</td><td>Decomposition</td><td>AI / HUMAN / DELEGATED packages</td><td>same</td></tr>
-<tr><td>F03</td><td>Execution</td><td>Digital drafts only (no fake sends)</td><td>same</td></tr>
-<tr><td>—</td><td>Insurer check</td><td><strong>Simulated</strong> Python fixture</td><td>n/a</td></tr>
-<tr><td>F05</td><td>Human handoff</td><td>Brief, talking points, documents</td><td>same</td></tr>
-<tr><td>F04</td><td>Calendar</td><td>Deterministic scheduler + ICS export</td><td>same</td></tr>
-<tr><td>F06</td><td>Follow-up</td><td>Resume after user result</td><td>same</td></tr></table>
-<p><strong>Organization:</strong> explicit Python orchestrator passes each agent’s JSON to the next prompt. Demo mode uses labeled fixtures (not live calls). Live mode: one chat completion per agent when keys present.</p>
-
-<h3>One real run (demo mode, captured {len(IMG)} screens)</h3>
-<ol>
-<li>Daily Briefing intake with four-obligation request.</li>
-<li>Run Priority 0 → goals, opportunity cost, AI vs human split.</li>
-<li>Simulated insurer identity wall → intervention brief + ICS download.</li>
-<li>User pastes verification result → COMPLETED + follow-ups.</li>
-</ol>
-{img_tag("daily_briefing_start","Step 1 — Daily Briefing (before run)")}
-{img_tag("daily_briefing_after","Step 2 — After multi-agent run (intervention visible)")}
-<div class="pagebreak"></div>
-{img_tag("decisions","Step 3 — My Decisions (opportunity-cost plan)")}
-{img_tag("work","Step 4 — My Work (AI vs human packages)")}
-{img_tag("intervention","Step 5 — Intervention brief + ICS on Daily Briefing")}
-{img_tag("resume","Step 6 — After submit result & resume (COMPLETED)")}
-{img_tag("agent_activity","Step 7 — Agent Activity (demo: tokens/cost UNKNOWN)")}
-
-<h2>5. Tokenomics</h2>
-<table>
-<tr><th>Metric</th><th>Demo run (measured)</th><th>Live run</th></tr>
-<tr><td>Input tokens</td><td><strong>Not measured</strong> (fixtures; $0)</td><td class="warn"><strong>PLACEHOLDER — paste measured values after one live run:</strong> input: ____ · cached: ____ · output: ____</td></tr>
-<tr><td>Cost per Priority 0 run</td><td>$0</td><td>Unknown until measured; app records usage when API returns it</td></tr>
-<tr><td>20 runs / user / month</td><td>$0</td><td>20 × measured run cost</td></tr>
-<tr><td>100 users / month</td><td>$0</td><td>100 × (monthly per user)</td></tr>
-<tr><td>10,000 users / month</td><td>$0</td><td>10,000 × (monthly per user); caching + shorter prompts needed</td></tr>
-</table>
-<p><strong>Cost controls built:</strong> <code>MAX_AGENT_CALLS</code>, <code>MAX_WORKFLOW_COST_USD</code>, <code>APP_MODE=demo</code> default, REVIEW_ALL skips F03 unless approved. Tradeoff: demo cannot evidence token savings without live keys.</p>
-
-<h2>6. Safety</h2>
-<ul>
-<li>Prompt-injection heuristics + quarantine banner on untrusted input</li>
-<li>Secret scrubbing in UI/logs</li>
-<li>Agents cannot claim emails/insurer calls completed</li>
-<li>REVIEW_ALL permission gate before autonomous execution</li>
-<li>ICS excludes private brief contents</li>
-</ul>
-{img_tag("safety","Settings — permission mode + safety self-check")}
-<h3>Automated test output (defense evidence)</h3>
-<pre>{SAFETY_TEST}</pre>
-
-<h2>7. Impact</h2>
-<p><strong>Evidence from this build (not a multi-user pilot):</strong></p>
-<ul>
-<li>End-to-end demo path completes in under one minute on local hardware (builder test).</li>
-<li>Workflow cannot reach COMPLETED on insurance without a user-supplied verification result (WAITING_RESULT gate).</li>
-<li>pytest: 14+ tests including E2E, scheduler conflict tests, safety, permissions.</li>
-</ul>
-<p class="warn">No invented user quotes or hours-saved claims. A real pilot would be the next evidence step.</p>
-
-<h2>8. Limits + next steps</h2>
-<ul>
-<li>Insurer, email, SMS, purchases: simulated or not built.</li>
-<li>Live tokenomics: Kay can run with course <code>PORTKEY_API_KEY</code> + <code>gpt-6-luna</code> and paste measured numbers into the placeholder above.</li>
-<li>CUSTOM_AUTONOMY tool allowlist, Network/Career modules: planned.</li>
-<li>Next month: calendar OAuth, live token screenshot, 3–5 user pilot.</li>
-</ul>
-<p class="small">Public repo · {REPO}</p>
-</body></html>"""
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    spec = importlib.util.spec_from_file_location(
+        "expanded_report", ROOT / "scripts" / "expanded_report.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader
+    spec.loader.exec_module(mod)
+    trace = mod.capture_demo_trace()
+    return mod.render_expanded_report(
+        repo=REPO,
+        arch_svg=ARCH_SVG,
+        safety_test=SAFETY_TEST,
+        trace=trace,
+        img=lambda k, alt: img_tag(k, alt),
+    )
 
 
 def build_slides() -> str:
@@ -224,9 +134,49 @@ def build_slides() -> str:
 </body></html>"""
 
 
+def word_count(html: str) -> int:
+    import re
+
+    text = re.sub(r"<script[^>]*>.*?</script>", " ", html, flags=re.S | re.I)
+    text = re.sub(r"<style[^>]*>.*?</style>", " ", text, flags=re.S | re.I)
+    text = re.sub(r"<[^>]+>", " ", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return len(text.split())
+
+
+def pdf_page_count(html_path: Path) -> int | None:
+    try:
+        from pypdf import PdfReader
+        from playwright.sync_api import sync_playwright
+
+        pdf_path = html_path.with_suffix(".pdf")
+        url = html_path.resolve().as_uri()
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            page.goto(url, wait_until="networkidle", timeout=120_000)
+            page.pdf(
+                path=str(pdf_path),
+                format="Letter",
+                margin={"top": "0.7in", "bottom": "0.7in", "left": "0.7in", "right": "0.7in"},
+                print_background=True,
+            )
+            browser.close()
+        return len(PdfReader(str(pdf_path)).pages)
+    except Exception as exc:  # noqa: BLE001
+        print("pdf_page_count failed:", exc)
+        return None
+
+
 if __name__ == "__main__":
-    (ROOT / "deliverables" / "report.html").write_text(build_report(), encoding="utf-8")
+    report_html = build_report()
+    report_path = ROOT / "deliverables" / "report.html"
+    report_path.write_text(report_html, encoding="utf-8")
     (ROOT / "deliverables" / "slides.html").write_text(build_slides(), encoding="utf-8")
-  # slide count
+    wc = word_count(report_html)
+    pages = pdf_page_count(report_path)
     slide_count = build_slides().count("<section>")
-    print("wrote report + slides, sections=", slide_count)
+    print("wrote report + slides")
+    print("word_count=", wc)
+    print("pdf_pages=", pages)
+    print("slide_sections=", slide_count)
