@@ -3,7 +3,7 @@
 **Public repo:** https://github.com/kalmanna3i/outsource  
 **Kay Al Mannai · MGT 409 · Nov 23, 2026**
 
-**Tests:** `APP_MODE=demo pytest -q tests/` → run after merge (Priority 0 + Contextual + Strategic Radar)  
+**Tests:** `APP_MODE=demo pytest -q tests/` → **44 passed** (Priority 0 + Contextual Opportunity Engine + Strategic Radar)  
 **Demo:** Priority 0 E2E verified (demo fixtures + UI screenshots embedded in `deliverables/report.html` / `slides.html`)  
 **Live tokens:** **Measured** Nov 23 (5:37 PM ET): one live run + resume on gpt-6-luna via OpenAI directly (course Portkey key returned 401 on that path). 8 calls · 4,283 input / 0 cached / 5,387 output tokens · $0.003122 · 49.1 s. See Report §5 and the Cost slide.
 
