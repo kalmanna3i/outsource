@@ -1,0 +1,1 @@
+"""OUTSOURCE core package."""

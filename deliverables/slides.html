@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OUTSOURCE — Slides — Kay Al Mannai</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css" />
+  <style>
+    :root {
+      --navy: #0B1F33; --teal: #3F6F7A; --ivory: #F7F3EC;
+    }
+    .reveal { font-family: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif; }
+    .reveal .slides { text-align: left; }
+    .reveal h1, .reveal h2, .reveal h3 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      text-transform: none; letter-spacing: 0.01em; color: var(--ivory);
+    }
+    .reveal .slide-background { background: #0B1F33; }
+    .reveal section {
+      background:
+        radial-gradient(900px 420px at 0% 0%, #1A3A55 0%, transparent 55%),
+        radial-gradient(700px 360px at 100% 100%, #2C5560 0%, transparent 50%),
+        #0B1F33;
+      padding: 1.2rem 1.6rem !important;
+    }
+    .reveal p, .reveal li { color: #E7EEF2; font-size: 0.95em; }
+    .reveal .brand { font-size: 2.6em; margin: 0; color: #F7F3EC; }
+    .reveal .tag { color: #D7E4E7; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.45em; }
+    .reveal .teal { color: #9FCBD3; }
+    .reveal .box {
+      background: rgba(247,243,236,0.08); border: 1px solid #3F6F7A;
+      padding: 0.6em 0.8em; margin: 0.4em 0;
+    }
+    .reveal code { background: #14304A; color: #F7F3EC; }
+    .reveal .small { font-size: 0.55em; color: #A9B7C2; }
+    .diagram {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.42em; line-height: 1.35; white-space: pre;
+      background: #071623; padding: 0.8em 1em; color: #D7E4E7;
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section>
+        <p class="tag">Yale SOM · MGT 409</p>
+        <h1 class="brand">OUTSOURCE</h1>
+        <p class="teal">Know what matters. Do what only you can. Delegate the rest.</p>
+        <p>Kay Al Mannai · Personal Strategy &amp; Execution Office</p>
+      </section>
+
+      <section>
+        <h2>The problem</h2>
+        <p>Same evening: MBA hard deadline · fixed wedding · work ask · insurance portal.</p>
+        <div class="box">Calendars don’t know goals. Chatbots invent completed calls. Task lists don’t stage the human moment.</div>
+        <p>Scarce resource = <strong>judgment &amp; presence</strong>, not more drafts.</p>
+      </section>
+
+      <section>
+        <h2>What’s new</h2>
+        <ul>
+          <li>Goal-aware opportunity-cost decisions</li>
+          <li>Honest AI vs human allocation</li>
+          <li>On barrier: private brief + calendar ICS + resume</li>
+          <li>Demo fixtures labeled; no fake external actions</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>How the agents work</h2>
+        <div class="diagram">A01 Intake → A02 Goals → B01 Opportunity cost
+        → F02 Decompose → F03 Execute
+        → Insurer wall → F05 Handoff → F04 ICS
+        → User result → F06 Follow-up</div>
+        <p class="small">Independent calls in live mode · labeled fixtures in demo</p>
+      </section>
+
+      <section>
+        <h2>Demo path</h2>
+        <ol>
+          <li>Read Life Blueprint goals</li>
+          <li>Recommend sequence (protect wedding + deadline)</li>
+          <li>AI drafts MBA checklist + work update</li>
+          <li>Hit identity-verification wall</li>
+          <li>Brief + ICS → user result → resume</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Cost to run</h2>
+        <div class="box"><strong>Demo:</strong> $0 · tokens UNKNOWN (fixtures)</div>
+        <div class="box"><strong>Live:</strong> usage from API · estimate when price table known · else UNKNOWN</div>
+        <p>Guards: <code>MAX_AGENT_CALLS=25</code>, <code>MAX_WORKFLOW_COST_USD=2.00</code></p>
+      </section>
+
+      <section>
+        <h2>Safety</h2>
+        <ul>
+          <li>Injection heuristics + quarantine banner</li>
+          <li>Secret scrubbing in logs/UI</li>
+          <li>No invented emails / insurer calls</li>
+          <li>Sensitive details stay out of ICS</li>
+        </ul>
+        <p class="small">Evidence: Settings self-check + pytest</p>
+      </section>
+
+      <section>
+        <h2>Impact</h2>
+        <ul>
+          <li>Plan across 4 obligations in &lt;1 minute</li>
+          <li>Blocks false “AI completed verification”</li>
+          <li>ICS without claim secrets</li>
+          <li>Follow-ups auto-written on resume</li>
+        </ul>
+        <p class="small">Evidence from builder demo runs &amp; tests — not a multi-user pilot</p>
+      </section>
+
+      <section>
+        <h2>What’s next</h2>
+        <ul>
+          <li>Calendar OAuth + approve-to-send email</li>
+          <li>Pilot with 3–5 managers</li>
+          <li>Career / networking modules (currently Planned)</li>
+        </ul>
+        <p class="teal">Run: <code>streamlit run app.py</code></p>
+      </section>
+
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>Reveal.initialize({ hash: true, slideNumber: true, controls: true, progress: true });</script>
+</body>
+</html>

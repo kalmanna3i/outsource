@@ -1,0 +1,228 @@
+"""SQLite helpers and seed data."""
+
+from __future__ import annotations
+
+import json
+import sqlite3
+from pathlib import Path
+
+from core.config import get_settings
+from core.models import Goal, LifeBlueprint, PersonProfile
+
+
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS blueprint (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    data_json TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS workflows (
+    workflow_id TEXT PRIMARY KEY,
+    data_json TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS people (
+    person_id TEXT PRIMARY KEY,
+    data_json TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS settings_kv (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS agent_activity (
+    call_id TEXT PRIMARY KEY,
+    workflow_id TEXT,
+    data_json TEXT NOT NULL
+);
+"""
+
+
+def db_path() -> Path:
+    return get_settings().data_dir / "outsource.db"
+
+
+def connect() -> sqlite3.Connection:
+    path = db_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(str(path))
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db(reset: bool = False) -> None:
+    path = db_path()
+    if reset and path.exists():
+        path.unlink()
+    with connect() as conn:
+        conn.executescript(SCHEMA)
+        row = conn.execute("SELECT data_json FROM blueprint WHERE id = 1").fetchone()
+        if not row:
+            bp = default_blueprint()
+            conn.execute(
+                "INSERT INTO blueprint (id, data_json) VALUES (1, ?)",
+                (bp.model_dump_json(),),
+            )
+        people_count = conn.execute("SELECT COUNT(*) AS c FROM people").fetchone()["c"]
+        if people_count == 0:
+            for person in default_people():
+                conn.execute(
+                    "INSERT INTO people (person_id, data_json) VALUES (?, ?)",
+                    (person.person_id, person.model_dump_json()),
+                )
+        mode = conn.execute(
+            "SELECT value FROM settings_kv WHERE key = 'permission_mode'"
+        ).fetchone()
+        if not mode:
+            conn.execute(
+                "INSERT INTO settings_kv (key, value) VALUES ('permission_mode', ?)",
+                ("MANAGED_AUTONOMY",),
+            )
+        conn.commit()
+
+
+def default_blueprint() -> LifeBlueprint:
+    return LifeBlueprint(
+        user_name="Kay Al Mannai",
+        personal_summary=(
+            "Yale SOM MBA candidate building a Personal Strategy & Execution Office "
+            "that protects scarce attention for high-leverage human work."
+        ),
+        career="Post-MBA leadership path with operational excellence and AI-enabled leverage.",
+        academic="Complete MGT 409 final and remaining MBA deliverables at high quality.",
+        financial="Maintain optionality; avoid impulsive large commitments without analysis.",
+        relationships="Show up for important personal milestones (weddings, family).",
+        family="Stay present for family obligations without dropping academic/career standards.",
+        lifestyle="Protect sleep and focus blocks around hard deadlines.",
+        health="No sensitive medical inferences; user-managed only.",
+        legacy="Build tools that help managers reclaim judgment time.",
+        goals=[
+            Goal(
+                title="Submit MGT 409 final (app + report + slides)",
+                domain="academic",
+                target_date="2026-11-23",
+                importance=10,
+                progress=0.7,
+                success_criteria="Repo + report.html + slides.html submitted by 11:59 PM ET",
+            ),
+            Goal(
+                title="Attend close friend's wedding",
+                domain="relationships",
+                target_date="2026-11-23",
+                importance=9,
+                progress=0.5,
+                success_criteria="Arrive on time, fully present; logistics handled in advance",
+            ),
+            Goal(
+                title="Clear critical work obligation",
+                domain="career",
+                target_date="2026-11-23",
+                importance=8,
+                progress=0.4,
+                success_criteria="Stakeholder receives required deliverable or confirmed deferral",
+            ),
+            Goal(
+                title="Resolve insurance claim status",
+                domain="financial",
+                target_date="2026-11-30",
+                importance=7,
+                progress=0.2,
+                success_criteria="Claim status known; next action scheduled or completed",
+            ),
+        ],
+    )
+
+
+def default_people() -> list[PersonProfile]:
+    return [
+        PersonProfile(
+            name="Alex Rivera",
+            relationship="Close friend (wedding)",
+            notes="Wedding this weekend — presence matters more than gifts.",
+            milestones=["Wedding ceremony"],
+        ),
+        PersonProfile(
+            name="Jordan Lee",
+            relationship="Work stakeholder",
+            notes="Needs the work package update today.",
+        ),
+        PersonProfile(
+            name="Sam Patel",
+            relationship="MBA classmate",
+            notes="Peer review swap possible for slides.",
+        ),
+    ]
+
+
+def load_blueprint() -> LifeBlueprint:
+    init_db()
+    with connect() as conn:
+        row = conn.execute("SELECT data_json FROM blueprint WHERE id = 1").fetchone()
+        return LifeBlueprint.model_validate_json(row["data_json"])
+
+
+def save_blueprint(bp: LifeBlueprint) -> None:
+    init_db()
+    with connect() as conn:
+        conn.execute(
+            "UPDATE blueprint SET data_json = ? WHERE id = 1",
+            (bp.model_dump_json(),),
+        )
+        conn.commit()
+
+
+def save_workflow(workflow_json: str, workflow_id: str, updated_at: str) -> None:
+    init_db()
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO workflows (workflow_id, data_json, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(workflow_id) DO UPDATE SET
+              data_json = excluded.data_json,
+              updated_at = excluded.updated_at
+            """,
+            (workflow_id, workflow_json, updated_at),
+        )
+        conn.commit()
+
+
+def load_workflow(workflow_id: str) -> dict | None:
+    init_db()
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT data_json FROM workflows WHERE workflow_id = ?",
+            (workflow_id,),
+        ).fetchone()
+        if not row:
+            return None
+        return json.loads(row["data_json"])
+
+
+def list_workflows() -> list[dict]:
+    init_db()
+    with connect() as conn:
+        rows = conn.execute(
+            "SELECT workflow_id, updated_at, data_json FROM workflows ORDER BY updated_at DESC"
+        ).fetchall()
+        out = []
+        for r in rows:
+            data = json.loads(r["data_json"])
+            out.append(
+                {
+                    "workflow_id": r["workflow_id"],
+                    "updated_at": r["updated_at"],
+                    "status": data.get("status"),
+                    "user_request": data.get("user_request", "")[:120],
+                }
+            )
+        return out
+
+
+def list_people() -> list[PersonProfile]:
+    init_db()
+    with connect() as conn:
+        rows = conn.execute("SELECT data_json FROM people").fetchall()
+        return [PersonProfile.model_validate_json(r["data_json"]) for r in rows]
+
+
+def reset_demo_data() -> None:
+    init_db(reset=True)
