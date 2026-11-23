@@ -16,6 +16,8 @@ _EST_PRICE_PER_1M = {
     "gpt-4o-mini": {"input": 0.15, "output": 0.60},
     "gpt-4o": {"input": 2.50, "output": 10.00},
     "gpt-5.1-codex": {"input": 1.25, "output": 10.00},
+    # MGT 409 course pricing (Lecture 11).
+    "gpt-6-luna": {"input": 0.10, "cached_input": 0.01, "output": 0.50},
 }
 
 
@@ -58,16 +60,25 @@ class LLMClient:
             )
 
     def _estimate_cost(
-        self, model: str, input_tokens: int | None, output_tokens: int | None
+        self,
+        model: str,
+        input_tokens: int | None,
+        output_tokens: int | None,
+        cached_input_tokens: int | None = None,
     ) -> tuple[float | None, bool]:
         if input_tokens is None or output_tokens is None:
             return None, False
         prices = _EST_PRICE_PER_1M.get(model)
         if not prices:
             return None, False
-        cost = (input_tokens / 1_000_000) * prices["input"] + (
-            output_tokens / 1_000_000
-        ) * prices["output"]
+        # prompt_tokens includes cached tokens; bill those at the cached rate when known.
+        cached = min(cached_input_tokens or 0, input_tokens)
+        cached_rate = prices.get("cached_input", prices["input"])
+        cost = (
+            ((input_tokens - cached) / 1_000_000) * prices["input"]
+            + (cached / 1_000_000) * cached_rate
+            + (output_tokens / 1_000_000) * prices["output"]
+        )
         return cost, True
 
     def complete(
@@ -135,7 +146,7 @@ class LLMClient:
             if usage and hasattr(usage, "prompt_tokens_details"):
                 details = usage.prompt_tokens_details
                 cached = getattr(details, "cached_tokens", None) if details else None
-            cost, known = self._estimate_cost(self.settings.model, in_tok, out_tok)
+            cost, known = self._estimate_cost(self.settings.model, in_tok, out_tok, cached)
             record.input_tokens = in_tok
             record.output_tokens = out_tok
             record.cached_input_tokens = cached

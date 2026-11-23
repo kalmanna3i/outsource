@@ -3,7 +3,7 @@
 **Public repo:** https://github.com/kalmanna3i/outsource  
 **Kay Al Mannai · MGT 409 · Nov 23, 2026**
 
-**Tests:** `APP_MODE=demo pytest -q tests/` → **15 passed** (includes parent `.env` load test)  
+**Tests:** `APP_MODE=demo pytest -q tests/` → **17 passed** (includes parent `.env` load test and gpt-6-luna pricing)  
 **Demo:** Priority 0 E2E verified (demo fixtures + UI screenshots embedded in `deliverables/report.html` / `slides.html`)  
 **Live tokens:** **Not measured** on build VM (no keys). Report has a marked placeholder for Kay’s live run.
 
