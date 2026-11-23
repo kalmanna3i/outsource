@@ -31,6 +31,7 @@ from database.db import (
 )
 from services.finance import project_cashflow
 from services.workflow import WorkflowEngine
+from ui.contextual_page import render_contextual
 from ui.theme import CUSTOM_CSS, MODULE_STATUS
 
 st.set_page_config(
@@ -87,6 +88,7 @@ NAV = [
     "My Career",
     "My Financial Future",
     "Agent Activity",
+    "Contextual Opportunities",
     "Settings",
 ]
 
@@ -513,6 +515,7 @@ def main() -> None:
         "My Career": page_career,
         "My Financial Future": page_finance,
         "Agent Activity": page_activity,
+        "Contextual Opportunities": render_contextual,
         "Settings": page_settings,
     }[page]()
 
