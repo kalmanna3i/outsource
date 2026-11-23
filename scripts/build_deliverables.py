@@ -118,7 +118,7 @@ def build_slides() -> str:
 
 <section><h2>Demo screenshots</h2>{imgs}</section>
 
-<section><h2>Cost</h2><p>Demo: $0, tokens not measured.</p><p>Live: fill measured tokens in report placeholder.</p></section>
+<section><h2>Cost</h2><p>Estimate, not measured (gpt-6-luna course prices; assumed 12k in / 2.5k out per run): ≈ $0.00245 per run · $0.049 per user per month (20 runs) · $4.90 for 100 users · $490 for 10,000 users.</p><p>Both the course Portkey key and the personal OpenAI key returned 401 on Nov 23, so no live run was possible before the deadline. Demo: $0.</p></section>
 
 <section><h2>Safety</h2><p>Injection quarantine · REVIEW_ALL gate · no fake insurer calls</p></section>
 

@@ -5,7 +5,7 @@
 
 **Tests:** `APP_MODE=demo pytest -q tests/` → **17 passed** (includes parent `.env` load test and gpt-6-luna pricing)  
 **Demo:** Priority 0 E2E verified (demo fixtures + UI screenshots embedded in `deliverables/report.html` / `slides.html`)  
-**Live tokens:** **Not measured** on build VM (no keys). Report has a marked placeholder for Kay’s live run.
+**Live tokens:** **Not measured.** On Nov 23 both the course Portkey key and Kay’s personal OpenAI key returned 401, so Report §5 and the Cost slide show labeled estimates (gpt-6-luna course prices), not measurements.
 
 | Area | Status |
 |------|--------|

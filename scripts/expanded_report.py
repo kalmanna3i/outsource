@@ -212,23 +212,22 @@ li{{margin:0.2em 0}}
 {img("agent_activity","Figure 7 — Agent Activity: per-call mode and summaries")}
 
 <h2>5. Tokenomics</h2>
-<p>All dollar amounts below use <strong>measured</strong> data only when taken from a live API usage object. Demo runs are explicitly <strong>not measured</strong>.</p>
+<p>All per-run numbers below are <strong>estimates, not measurements</strong>. Prices are the course list prices for <code>gpt-6-luna</code> (MGT 409 Lecture 11, per 1M tokens): input $0.10, cached input $0.01, output $0.50. Token counts are an assumed Priority 0 run, not a provider usage object.</p>
 <h3>Definitions</h3>
 <ul>
 <li><strong>R</strong> = number of Priority 0 workflows per user per month (example: 20).</li>
 <li><strong>T_in, T_out, T_cached</strong> = tokens per workflow from provider usage (live only).</li>
-<li><strong>P_in, P_out</strong> = price per million tokens for the active model (from provider list price when known).</li>
-<li><strong>C_run</strong> = (T_in/10⁶)·P_in + (T_out/10⁶)·P_out (estimated if prices known).</li>
+<li><strong>P_in, P_cached, P_out</strong> = price per million tokens for the active model ($0.10, $0.01, $0.50 for <code>gpt-6-luna</code>; this table is now in <code>core/llm.py</code>).</li>
+<li><strong>C_run</strong> = ((T_in − T_cached)/10⁶)·P_in + (T_cached/10⁶)·P_cached + (T_out/10⁶)·P_out.</li>
 </ul>
 <table>
-<tr><th>Scale</th><th>Formula</th><th>Demo (this build)</th><th>Live (requires measurement)</th></tr>
-<tr><td>One run</td><td>C_run from usage</td><td><strong>Not measured</strong> — 0 tokens, $0</td><td>Fill from Agent Activity after one live run</td></tr>
-<tr><td>Per user / month</td><td>R × C_run</td><td>$0 at R=20</td><td>20 × C_run</td></tr>
-<tr><td>100 users / month</td><td>100 × R × C_run</td><td>$0</td><td>linear scale; shared caching not modeled</td></tr>
-<tr><td>10,000 users / month</td><td>10,000 × R × C_run</td><td>$0</td><td>requires batching, prompt compression, caps</td></tr>
+<tr><th>Scale</th><th>Formula</th><th>Demo (this build)</th><th>Live estimate (assumed 12,000 in / 0 cached / 2,500 out per run, R = 20)</th></tr>
+<tr><td>One run</td><td>C_run</td><td>$0 (fixtures, no tokens)</td><td><strong>≈ $0.00245</strong> (estimate, not measured)</td></tr>
+<tr><td>Per user / month</td><td>R × C_run</td><td>$0 at R=20</td><td>≈ $0.049</td></tr>
+<tr><td>100 users / month</td><td>100 × R × C_run</td><td>$0</td><td>≈ $4.90 (linear; shared caching not modeled)</td></tr>
+<tr><td>10,000 users / month</td><td>10,000 × R × C_run</td><td>$0</td><td>≈ $490 before batching, prompt compression and caching</td></tr>
 </table>
-<div class="placeholder"><strong>LIVE RUN PLACEHOLDER (not filled on build VM — no API key):</strong><br/>
-Input tokens: ______ · Cached input: ______ · Output tokens: ______ · Model: gpt-6-luna · C_run USD: ______ · Screenshot: Agent Activity page after live run.</div>
+<div class="placeholder"><strong>Live run status (Nov 23, 2026):</strong> both the course Portkey key (<code>gpt-6-luna</code>) and Kay&#39;s personal OpenAI key returned HTTP 401 (invalid API key) on Nov 23, so no live run was possible before the deadline; every token and dollar figure in this section is an estimate, not a measurement. If half of each run&#39;s input were served from the prompt cache, C_run would fall to about $0.00191.</div>
 <h3>Cost controls and tradeoffs</h3>
 <ul>
 <li><code>MAX_AGENT_CALLS</code> (default 25) — hard stop before another completion; prevents runaway loops; may truncate unfinished workflows if set too low (tested at 3).</li>
@@ -237,8 +236,8 @@ Input tokens: ______ · Cached input: ______ · Output tokens: ______ · Model: 
 <li><code>REVIEW_ALL</code> permission — blocks F03 until checkbox approval; saves tokens but requires extra UI click (operational in tests).</li>
 <li><strong>Deterministic engines</strong> — insurer check, scheduler, ICS export, finance projection, safety regex scan run without LLM spend; tradeoff: insurer is simulation only.</li>
 </ul>
-<p>If Maya ran live eight times per evening during exam season (unrealistic), monthly cost would be <em>R</em> × <em>C_run</em> with <em>R</em> ≈ 240; that stress case is why caps exist. Teaching staff grading in demo mode should expect <strong>not measured</strong> in the token column—this is correct behavior, not missing implementation.</p>
-<p><strong>Worked example (illustrative only — not measured):</strong> suppose a live Priority 0 run returned 12,000 input and 2,500 output tokens on <code>gpt-6-luna</code>, and staff recorded provider list prices <em>P_in</em> and <em>P_out</em> in dollars per million tokens. Then <em>C_run</em> = (12000/10⁶)<em>P_in</em> + (2500/10⁶)<em>P_out</em>. With <em>R</em> = 20 workflows/month, one user costs 20·<em>C_run</em>; 100 users cost 2,000·<em>C_run</em>; 10,000 users cost 200,000·<em>C_run</em> before engineering discounts. OUTSOURCE does not substitute guessed prices—leave the placeholder blank until Kay captures one live Agent Activity screenshot.</p>
+<p>If Maya ran live eight times per evening during exam season (unrealistic), monthly cost would be <em>R</em> × <em>C_run</em> with <em>R</em> ≈ 240; that stress case is why caps exist. Teaching staff grading in demo mode will see $0 and no token counts—this is correct behavior, not missing implementation.</p>
+<p><strong>Worked example (estimate — not measured):</strong> suppose a live Priority 0 run returned 12,000 input and 2,500 output tokens on <code>gpt-6-luna</code>. Then <em>C_run</em> = (12000/10⁶)<em>P_in</em> + (2500/10⁶)<em>P_out</em>. With <em>R</em> = 20 workflows/month, one user costs 20·<em>C_run</em>; 100 users cost 2,000·<em>C_run</em>; 10,000 users cost 200,000·<em>C_run</em> before engineering discounts. With the course prices ($0.10 in, $0.50 out per 1M), <em>C_run</em> = $0.0012 + $0.00125 = $0.00245, so one user costs about $0.049, 100 users about $4.90 and 10,000 users about $490 per month. These are estimates; a live Agent Activity capture would replace the assumed token counts.</p>
 
 <h2>6. Safety</h2>
 <h3>Threat model (selected)</h3>
@@ -291,7 +290,7 @@ Input tokens: ______ · Cached input: ______ · Output tokens: ______ · Model: 
 <p>Clone the public repository, optionally place a course <code>.env</code> one directory above the project folder, run <code>streamlit run app.py</code>, and execute the Priority 0 path in demo mode without spending tokens. Agent Activity should list eight calls after resume, each marked demo with UNKNOWN cost. If staff insert a real Portkey key and set <code>APP_MODE=live</code>, the same UI path should issue eight completions against <code>gpt-6-luna</code>; token fields populate only when the provider returns usage metadata. Staff should not expect email send buttons, live insurer APIs, or Network/Career modules—their absence is documented here rather than hidden.</p>
 <h3>One-month roadmap (if continued)</h3>
 <ol>
-<li>Week 1: push public GitHub repo; one live run; fill token placeholder with screenshot.</li>
+<li>Week 1: push public GitHub repo; one live run with a working key; replace the Section 5 estimates with measured tokens.</li>
 <li>Week 2: Google Calendar OAuth read-only for real busy blocks.</li>
 <li>Week 3: email draft→approve→send behind MANAGED_AUTONOMY only.</li>
 <li>Week 4: three fictional-to-real pilot sessions with timed before/after protocol (still no invented quotes in reports).</li>
