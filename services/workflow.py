@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Callable
@@ -45,6 +47,14 @@ def _normalize_assignee(raw: object) -> str:
     if "deleg" in val.lower():
         return "DELEGATED"
     return "AI"
+
+
+def _to_number(raw: object, default: float) -> float:
+    """Live models sometimes answer numeric fields in prose; take the first number or the default."""
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+        return float(raw)
+    match = re.search(r"-?\d+(?:\.\d+)?", str(raw or ""))
+    return float(match.group()) if match else default
 
 
 ProgressCb = Callable[[str], None]
@@ -337,7 +347,7 @@ class WorkflowEngine:
         options = [
             OpportunityCostItem(
                 label=o["label"],
-                time_hours=float(o.get("time_hours") or 0),
+                time_hours=_to_number(o.get("time_hours"), 0.0),
                 monetary_usd=o.get("monetary_usd"),
                 qualitative_value=o.get("qualitative_value") or "",
                 goal_alignment=list(o.get("goal_alignment") or []),
@@ -475,7 +485,7 @@ class WorkflowEngine:
         # Prefer a slot before the wedding if possible
         slot = find_slot(
             title=req.get("title") or intervention.title,
-            duration_minutes=int(req.get("duration_minutes") or 30),
+            duration_minutes=int(_to_number(req.get("duration_minutes"), 30)),
             busy=busy,
             search_start=now + timedelta(minutes=15),
             deadline=wedding_start,
@@ -487,7 +497,7 @@ class WorkflowEngine:
             # After wedding as fallback
             slot = find_slot(
                 title=req.get("title") or intervention.title,
-                duration_minutes=int(req.get("duration_minutes") or 30),
+                duration_minutes=int(_to_number(req.get("duration_minutes"), 30)),
                 busy=busy,
                 search_start=wedding_end + timedelta(minutes=30),
                 public_description=req.get("public_description")
@@ -554,7 +564,10 @@ class WorkflowEngine:
             },
         )
         state.agent_calls.append(rec)
-        state.follow_ups = list(follow.get("follow_ups") or [])
+        state.follow_ups = [
+            str(f.get("item") or f) if isinstance(f, dict) else str(f)
+            for f in (follow.get("follow_ups") or [])
+        ]
         state.digital_deliverables.append(
             f"Follow-up plan: {follow.get('closure_status')} — {follow.get('notes')}"
         )

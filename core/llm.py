@@ -16,9 +16,17 @@ _EST_PRICE_PER_1M = {
     "gpt-4o-mini": {"input": 0.15, "output": 0.60},
     "gpt-4o": {"input": 2.50, "output": 10.00},
     "gpt-5.1-codex": {"input": 1.25, "output": 10.00},
-    # MGT 409 course pricing (Lecture 11).
-    "gpt-6-luna": {"input": 0.10, "cached_input": 0.01, "output": 0.50},
+    # OpenAI Standard short-context pricing (matches MGT 409 Lecture 11).
+    "gpt-6-luna": {
+        "input": 0.10,
+        "cached_input": 0.01,
+        "cache_write": 0.125,
+        "output": 0.50,
+    },
 }
+
+# These models reject any temperature other than the default (400 Unsupported value).
+_DEFAULT_TEMPERATURE_ONLY = ("gpt-6", "gpt-5")
 
 
 class BudgetExceeded(RuntimeError):
@@ -65,18 +73,22 @@ class LLMClient:
         input_tokens: int | None,
         output_tokens: int | None,
         cached_input_tokens: int | None = None,
+        cache_write_tokens: int | None = None,
     ) -> tuple[float | None, bool]:
         if input_tokens is None or output_tokens is None:
             return None, False
         prices = _EST_PRICE_PER_1M.get(model)
         if not prices:
             return None, False
-        # prompt_tokens includes cached tokens; bill those at the cached rate when known.
+        # prompt_tokens includes cached-read and cache-write tokens; bill each at its own rate.
         cached = min(cached_input_tokens or 0, input_tokens)
+        written = min(cache_write_tokens or 0, input_tokens - cached)
         cached_rate = prices.get("cached_input", prices["input"])
+        write_rate = prices.get("cache_write", prices["input"])
         cost = (
-            ((input_tokens - cached) / 1_000_000) * prices["input"]
+            ((input_tokens - cached - written) / 1_000_000) * prices["input"]
             + (cached / 1_000_000) * cached_rate
+            + (written / 1_000_000) * write_rate
             + (output_tokens / 1_000_000) * prices["output"]
         )
         return cost, True
@@ -134,8 +146,12 @@ class LLMClient:
                         + "\n\nRespond with a single JSON object only. No markdown.",
                     },
                 ],
-                temperature=0.2,
                 response_format={"type": "json_object"},
+                **(
+                    {}
+                    if self.settings.model.startswith(_DEFAULT_TEMPERATURE_ONLY)
+                    else {"temperature": 0.2}
+                ),
             )
             content = response.choices[0].message.content or "{}"
             payload = json.loads(content)
@@ -143,13 +159,18 @@ class LLMClient:
             in_tok = getattr(usage, "prompt_tokens", None) if usage else None
             out_tok = getattr(usage, "completion_tokens", None) if usage else None
             cached = None
+            written = None
             if usage and hasattr(usage, "prompt_tokens_details"):
                 details = usage.prompt_tokens_details
                 cached = getattr(details, "cached_tokens", None) if details else None
-            cost, known = self._estimate_cost(self.settings.model, in_tok, out_tok, cached)
+                written = getattr(details, "cache_write_tokens", None) if details else None
+            cost, known = self._estimate_cost(
+                self.settings.model, in_tok, out_tok, cached, written
+            )
             record.input_tokens = in_tok
             record.output_tokens = out_tok
             record.cached_input_tokens = cached
+            record.cache_write_tokens = written
             record.cost_usd = cost
             record.cost_known = known
             if cost:

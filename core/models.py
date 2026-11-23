@@ -148,6 +148,7 @@ class AgentCallRecord(BaseModel):
     input_tokens: int | None = None
     output_tokens: int | None = None
     cached_input_tokens: int | None = None
+    cache_write_tokens: int | None = None
     cost_usd: float | None = None
     cost_known: bool = False
     mode: Literal["demo", "live"] = "demo"

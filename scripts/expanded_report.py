@@ -2,9 +2,24 @@
 
 from __future__ import annotations
 
+import base64
 import html
 import json
+from pathlib import Path
 from typing import Any, Callable
+
+
+LIVE_SHOT = Path(__file__).resolve().parent.parent / "deliverables" / "live_agent_activity.png"
+
+
+def live_figure() -> str:
+    """Figure 9: Agent Activity screenshot from the measured live run (Nov 23, 2026)."""
+    b64 = base64.b64encode(LIVE_SHOT.read_bytes()).decode()
+    return (
+        '<figure class="shot"><img alt="Figure 9 — Agent Activity after the live gpt-6-luna run: per-agent input, cached and output tokens and cost" style="max-width:100%;max-height:none;border:1px solid #D9D2C5" src="data:image/png;base64,'
+        + b64
+        + '" /><figcaption>Figure 9 — Agent Activity after the live gpt-6-luna run (measured tokens and cost per agent)</figcaption></figure>'
+    )
 
 
 def capture_demo_trace() -> dict[str, Any]:
@@ -212,32 +227,47 @@ li{{margin:0.2em 0}}
 {img("agent_activity","Figure 7 — Agent Activity: per-call mode and summaries")}
 
 <h2>5. Tokenomics</h2>
-<p>All per-run numbers below are <strong>estimates, not measurements</strong>. Prices are the course list prices for <code>gpt-6-luna</code> (MGT 409 Lecture 11, per 1M tokens): input $0.10, cached input $0.01, output $0.50. Token counts are an assumed Priority 0 run, not a provider usage object.</p>
+<p>All numbers below are <strong>measured</strong> from one live Priority 0 run on Nov 23, 2026 (5:37 PM ET), including the resume after the human intervention. The run used <code>gpt-6-luna</code> called <strong>directly on the OpenAI API with Kay&#39;s personal OpenAI key</strong> (<code>APP_MODE=live</code>). The course Portkey key was rejected with HTTP 401 (&ldquo;Invalid API Key&rdquo;, code 03), so the course route could not be used. Token counts come from each response&#39;s <code>usage</code> object. Cost uses OpenAI Standard prices for gpt-6-luna per 1M tokens: input $0.10, cached input $0.01, cache write $0.125, output $0.50 (the same as Lecture 11).</p>
+<h3>Measured run (workflow wf_f56cc5c696df, status COMPLETED)</h3>
+<table>
+<tr><th>Agent call</th><th>Input tokens</th><th>Cached input</th><th>Output tokens</th><th>Cost (USD)</th></tr>
+<tr><td>A01 Chief of Staff</td><td>152</td><td>0</td><td>757</td><td>$0.000394</td></tr>
+<tr><td>A02 Life Strategy Architect</td><td>1,005</td><td>0</td><td>990</td><td>$0.000596</td></tr>
+<tr><td>B01 Opportunity Cost Economist</td><td>877</td><td>0</td><td>1,220</td><td>$0.000698</td></tr>
+<tr><td>F02 Task Decomposition and Delegation</td><td>890</td><td>0</td><td>842</td><td>$0.000510</td></tr>
+<tr><td>F03 Autonomous Execution</td><td>196</td><td>0</td><td>177</td><td>$0.000108</td></tr>
+<tr><td>F05 Human Intervention and Handoff</td><td>138</td><td>0</td><td>355</td><td>$0.000191</td></tr>
+<tr><td>F04 Calendar and Logistics</td><td>125</td><td>0</td><td>422</td><td>$0.000224</td></tr>
+<tr><td>F06 Follow-Up and Accountability</td><td>900</td><td>0</td><td>624</td><td>$0.000402</td></tr>
+<tr><td><strong>Total (8 live calls)</strong></td><td><strong>4,283</strong></td><td><strong>0</strong></td><td><strong>5,387</strong></td><td><strong>$0.003122</strong></td></tr>
+</table>
+<p>Wall time: <strong>49.1 s</strong> end to end. That is 42.9 s for the seven calls up to the human barrier (A01&ndash;F04) and 6.2 s for F06 after the verification result was entered. It excludes the human&#39;s own time on the insurer call.</p>
+{live_figure()}
 <h3>Definitions</h3>
 <ul>
-<li><strong>R</strong> = number of Priority 0 workflows per user per month (example: 20).</li>
-<li><strong>T_in, T_out, T_cached</strong> = tokens per workflow from provider usage (live only).</li>
-<li><strong>P_in, P_cached, P_out</strong> = price per million tokens for the active model ($0.10, $0.01, $0.50 for <code>gpt-6-luna</code>; this table is now in <code>core/llm.py</code>).</li>
-<li><strong>C_run</strong> = ((T_in − T_cached)/10⁶)·P_in + (T_cached/10⁶)·P_cached + (T_out/10⁶)·P_out.</li>
+<li><strong>R</strong> = Priority 0 workflows per user per month. Assumption: <strong>R = 20</strong> (about one per weekday).</li>
+<li><strong>T_in, T_cached, T_out</strong> = tokens per workflow from provider usage (measured above: 4,283 / 0 / 5,387).</li>
+<li><strong>P_in, P_cached, P_out</strong> = price per 1M tokens ($0.10, $0.01, $0.50 for <code>gpt-6-luna</code>; this table is in <code>core/llm.py</code>).</li>
+<li><strong>C_run</strong> = ((T_in &minus; T_cached)/10⁶)&middot;P_in + (T_cached/10⁶)&middot;P_cached + (T_out/10⁶)&middot;P_out.</li>
 </ul>
 <table>
-<tr><th>Scale</th><th>Formula</th><th>Demo (this build)</th><th>Live estimate (assumed 12,000 in / 0 cached / 2,500 out per run, R = 20)</th></tr>
-<tr><td>One run</td><td>C_run</td><td>$0 (fixtures, no tokens)</td><td><strong>≈ $0.00245</strong> (estimate, not measured)</td></tr>
-<tr><td>Per user / month</td><td>R × C_run</td><td>$0 at R=20</td><td>≈ $0.049</td></tr>
-<tr><td>100 users / month</td><td>100 × R × C_run</td><td>$0</td><td>≈ $4.90 (linear; shared caching not modeled)</td></tr>
-<tr><td>10,000 users / month</td><td>10,000 × R × C_run</td><td>$0</td><td>≈ $490 before batching, prompt compression and caching</td></tr>
+<tr><th>Scale</th><th>Formula</th><th>Demo (grading mode)</th><th>Live (from measured run, R = 20)</th></tr>
+<tr><td>One run</td><td>C_run</td><td>$0 (fixtures, no tokens)</td><td><strong>$0.00312</strong></td></tr>
+<tr><td>Per user / month</td><td>R &times; C_run</td><td>$0</td><td><strong>$0.0624</strong></td></tr>
+<tr><td>100 users / month</td><td>100 &times; R &times; C_run</td><td>$0</td><td><strong>$6.24</strong></td></tr>
+<tr><td>10,000 users / month</td><td>10,000 &times; R &times; C_run</td><td>$0</td><td><strong>$624.36</strong> before batching, output caps or caching</td></tr>
 </table>
-<div class="placeholder"><strong>Live run status (Nov 23, 2026):</strong> both the course Portkey key (<code>gpt-6-luna</code>) and Kay&#39;s personal OpenAI key returned HTTP 401 (invalid API key) on Nov 23, so no live run was possible before the deadline; every token and dollar figure in this section is an estimate, not a measurement. If half of each run&#39;s input were served from the prompt cache, C_run would fall to about $0.00191.</div>
+<h3>What drives the cost</h3>
+<p>Output tokens are 86% of the bill ($0.002694 of $0.003122), even though output is only 56% of all tokens, because gpt-6-luna output costs 5&times; input. Cached input was 0: each agent sends a different, short prompt (the largest is about 1,000 tokens), so there is no long shared prefix for the provider to cache. At this scale the useful lever is capping output length and tightening the JSON each agent returns, not caching. A02 and B01 together are 41% of cost. Two aborted attempts before the measured run made three extra billed calls, not included above: the model rejected <code>temperature=0.2</code>, and B01 answered a numeric field in prose. Both bugs were fixed in code before the run.</p>
 <h3>Cost controls and tradeoffs</h3>
 <ul>
-<li><code>MAX_AGENT_CALLS</code> (default 25) — hard stop before another completion; prevents runaway loops; may truncate unfinished workflows if set too low (tested at 3).</li>
-<li><code>MAX_WORKFLOW_COST_USD</code> (default 2.00) — accumulates estimated live spend only when usage+price table known; otherwise UNKNOWN.</li>
-<li><code>APP_MODE=demo</code> — zero spend for grading and screenshots; tradeoff: tokenomics section cannot show measured tokens without a live pass.</li>
-<li><code>REVIEW_ALL</code> permission — blocks F03 until checkbox approval; saves tokens but requires extra UI click (operational in tests).</li>
-<li><strong>Deterministic engines</strong> — insurer check, scheduler, ICS export, finance projection, safety regex scan run without LLM spend; tradeoff: insurer is simulation only.</li>
+<li><code>MAX_AGENT_CALLS</code> (default 25) &mdash; hard stop before another completion; prevents runaway loops; may truncate unfinished workflows if set too low (tested at 3).</li>
+<li><code>MAX_WORKFLOW_COST_USD</code> (default 2.00) &mdash; accumulates live spend from usage &times; the price table; the measured run used $0.0031, about 0.16% of the cap.</li>
+<li><code>APP_MODE=demo</code> &mdash; zero spend for grading and screenshots; tradeoff: demo runs show no token counts, which is why the figures above come from a separate live pass.</li>
+<li><code>REVIEW_ALL</code> permission &mdash; blocks F03 until checkbox approval; saves tokens but requires extra UI click (operational in tests).</li>
+<li><strong>Deterministic engines</strong> &mdash; insurer check, scheduler, ICS export, finance projection, safety regex scan run without LLM spend; tradeoff: insurer is simulation only.</li>
 </ul>
-<p>If Maya ran live eight times per evening during exam season (unrealistic), monthly cost would be <em>R</em> × <em>C_run</em> with <em>R</em> ≈ 240; that stress case is why caps exist. Teaching staff grading in demo mode will see $0 and no token counts—this is correct behavior, not missing implementation.</p>
-<p><strong>Worked example (estimate — not measured):</strong> suppose a live Priority 0 run returned 12,000 input and 2,500 output tokens on <code>gpt-6-luna</code>. Then <em>C_run</em> = (12000/10⁶)<em>P_in</em> + (2500/10⁶)<em>P_out</em>. With <em>R</em> = 20 workflows/month, one user costs 20·<em>C_run</em>; 100 users cost 2,000·<em>C_run</em>; 10,000 users cost 200,000·<em>C_run</em> before engineering discounts. With the course prices ($0.10 in, $0.50 out per 1M), <em>C_run</em> = $0.0012 + $0.00125 = $0.00245, so one user costs about $0.049, 100 users about $4.90 and 10,000 users about $490 per month. These are estimates; a live Agent Activity capture would replace the assumed token counts.</p>
+<p>Stress case: if Maya ran live eight times per evening during exam season (R &asymp; 240), she would cost about $0.75 per month. Even at 10,000 such users that is about $7,492 per month, so the caps exist to stop loops, not to make the base case affordable. Teaching staff grading in demo mode will see $0 and no token counts&mdash;this is correct behavior, not missing implementation.</p>
 
 <h2>6. Safety</h2>
 <h3>Threat model (selected)</h3>
@@ -281,7 +311,7 @@ li{{margin:0.2em 0}}
 <tr><th>Component</th><th>Label</th></tr>
 <tr><td>Priority 0 demo E2E, Blueprint CRUD, Decisions/Work/Attention/Calendar UI</td><td><strong>Operational</strong></td></tr>
 <tr><td>Parent-folder <code>.env</code>, Portkey gpt-6-luna default</td><td><strong>Operational</strong></td></tr>
-<tr><td>Live eight-call path with measured tokens on build VM</td><td><strong>Incomplete / unverified</strong></td></tr>
+<tr><td>Live eight-call path with measured tokens</td><td><strong>Operational</strong> (one live run, Nov 23; see Section 5)</td></tr>
 <tr><td>Insurer portal, CRM email</td><td><strong>Simulated</strong></td></tr>
 <tr><td>Finance projection module</td><td><strong>Simulated</strong> (deterministic; tax/retirement omitted)</td></tr>
 <tr><td>Network, Career nav, CUSTOM_AUTONOMY allowlist</td><td><strong>Planned</strong></td></tr>
@@ -290,7 +320,7 @@ li{{margin:0.2em 0}}
 <p>Clone the public repository, optionally place a course <code>.env</code> one directory above the project folder, run <code>streamlit run app.py</code>, and execute the Priority 0 path in demo mode without spending tokens. Agent Activity should list eight calls after resume, each marked demo with UNKNOWN cost. If staff insert a real Portkey key and set <code>APP_MODE=live</code>, the same UI path should issue eight completions against <code>gpt-6-luna</code>; token fields populate only when the provider returns usage metadata. Staff should not expect email send buttons, live insurer APIs, or Network/Career modules—their absence is documented here rather than hidden.</p>
 <h3>One-month roadmap (if continued)</h3>
 <ol>
-<li>Week 1: push public GitHub repo; one live run with a working key; replace the Section 5 estimates with measured tokens.</li>
+<li>Week 1: cap per-agent output length and rerun live to compare cost against the Section 5 baseline.</li>
 <li>Week 2: Google Calendar OAuth read-only for real busy blocks.</li>
 <li>Week 3: email draft→approve→send behind MANAGED_AUTONOMY only.</li>
 <li>Week 4: three fictional-to-real pilot sessions with timed before/after protocol (still no invented quotes in reports).</li>

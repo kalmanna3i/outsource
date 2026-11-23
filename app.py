@@ -431,6 +431,7 @@ def page_activity() -> None:
         return
     total_in = sum(c.input_tokens or 0 for c in wf.agent_calls)
     total_out = sum(c.output_tokens or 0 for c in wf.agent_calls)
+    total_cached = sum(c.cached_input_tokens or 0 for c in wf.agent_calls)
     known_costs = [c.cost_usd for c in wf.agent_calls if c.cost_known and c.cost_usd is not None]
     cost_display = (
         f"${sum(known_costs):.6f} (estimated from usage)"
@@ -438,11 +439,17 @@ def page_activity() -> None:
         else "UNKNOWN (demo fixtures have no token meter)"
     )
     st.write(f"Calls: **{len(wf.agent_calls)}** · Input tokens: **{total_in or 'UNKNOWN'}** · "
+             f"Cached input: **{total_cached if total_in else 'UNKNOWN'}** · "
              f"Output tokens: **{total_out or 'UNKNOWN'}** · Cost: **{cost_display}**")
     for c in wf.agent_calls:
         cost = f"${c.cost_usd:.6f}" if c.cost_known and c.cost_usd is not None else "UNKNOWN"
+        tokens = (
+            f" · in={c.input_tokens} cached={c.cached_input_tokens or 0} out={c.output_tokens}"
+            if c.input_tokens is not None
+            else ""
+        )
         st.markdown(
-            f"**{c.agent_id} {c.role}** · `{c.mode}` · success={c.success} · cost={cost}  \n"
+            f"**{c.agent_id} {c.role}** · `{c.mode}` · success={c.success}{tokens} · cost={cost}  \n"
             f"{scrub_secrets(c.summary)}"
         )
         if c.error:

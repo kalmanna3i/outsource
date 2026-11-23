@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import subprocess
 from pathlib import Path
@@ -48,6 +49,7 @@ ARCH_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 820 420' role
 </svg>"""
 
 IMG = json.loads(MANIFEST.read_text(encoding="utf-8"))
+LIVE_B64 = base64.b64encode((ROOT / "deliverables" / "live_agent_activity.png").read_bytes()).decode()
 
 
 def img_tag(key: str, alt: str, max_width: str = "100%") -> str:
@@ -118,13 +120,13 @@ def build_slides() -> str:
 
 <section><h2>Demo screenshots</h2>{imgs}</section>
 
-<section><h2>Cost</h2><p>Estimate, not measured (gpt-6-luna course prices; assumed 12k in / 2.5k out per run): ≈ $0.00245 per run · $0.049 per user per month (20 runs) · $4.90 for 100 users · $490 for 10,000 users.</p><p>Both the course Portkey key and the personal OpenAI key returned 401 on Nov 23, so no live run was possible before the deadline. Demo: $0.</p></section>
+<section><h2>Cost (measured, live)</h2><p style="font-size:.62em">One live run, Nov 23 · gpt-6-luna via OpenAI directly (personal key; course Portkey key returned 401) · 8 agent calls · 4,283 input / 0 cached / 5,387 output tokens · <strong>$0.00312</strong> per run · 49.1 s</p><p style="font-size:.62em">20 runs per user per month: $0.0624 per user · $6.24 for 100 users · $624.36 for 10,000 users. Output is 86% of cost.</p><img alt="Agent Activity after the live run" style="max-height:250px;width:auto;border:1px solid #3F6F7A" src="data:image/png;base64,{LIVE_B64}"/></section>
 
 <section><h2>Safety</h2><p>Injection quarantine · REVIEW_ALL gate · no fake insurer calls</p></section>
 
 <section><h2>Impact (honest)</h2><p>Verified E2E locally; no pilot users.</p></section>
 
-<section><h2>Limits &amp; next</h2><p>Public repo on GitHub · push live tokenomics · pilot users</p></section>
+<section><h2>Limits &amp; next</h2><p>Public repo on GitHub · cap output length to cut live cost · pilot users</p></section>
 
 <section><h2>Run it</h2><p><code>streamlit run app.py</code></p><p><a href="{REPO}">{REPO}</a></p></section>
 

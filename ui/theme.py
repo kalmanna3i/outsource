@@ -17,10 +17,7 @@ CUSTOM_CSS = """
 }
 
 .stApp {
-  background:
-    radial-gradient(1200px 500px at 10% -10%, #1A3A55 0%, transparent 55%),
-    radial-gradient(900px 400px at 100% 0%, #2C5560 0%, transparent 45%),
-    linear-gradient(180deg, #0B1F33 0%, #10263A 40%, #F7F3EC 40%, #F7F3EC 100%);
+  background: #F7F3EC;
   color: var(--ink);
   font-family: 'Source Sans 3', sans-serif;
 }
@@ -31,7 +28,13 @@ h1, h2, h3, .brand-title {
 }
 
 .brand-wrap {
-  padding: 1.2rem 0 0.4rem 0;
+  padding: 1.4rem 1.6rem 1.2rem 1.6rem;
+  margin-bottom: 1.2rem;
+  border-radius: 6px;
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #1A3A55 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #2C5560 0%, transparent 45%),
+    linear-gradient(180deg, #0B1F33 0%, #10263A 100%);
 }
 .brand-title {
   font-size: 2.6rem;
