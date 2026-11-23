@@ -50,7 +50,7 @@ def layout(graph: NetworkGraph) -> dict[str, tuple[float, float]]:
     pos: dict[str, tuple[float, float]] = {}
     for ring, members in rings.items():
         radius = ring * 1.15
-        offset = ring * 0.45
+        offset = {1: 2.2, 2: 0.3, 3: 0.75}.get(ring, 0.0)
         for i, n in enumerate(members):
             angle = offset + 2 * math.pi * i / max(len(members), 1)
             pos[n.node_id] = (radius * math.cos(angle), radius * math.sin(angle))

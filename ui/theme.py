@@ -93,6 +93,34 @@ section[data-testid="stSidebar"] * {
   color: #F7F3EC !important;
 }
 div[data-testid="stSidebarNav"] { display: none; }
+.opp-card {
+  background: #FFFDF8;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--teal);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.9rem;
+}
+.opp-card.distraction { border-left-color: var(--warn); opacity: 0.85; }
+.opp-card.review { border-left-color: #9AA7B2; }
+.opp-cat {
+  font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal);
+}
+.opp-title {
+  font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; color: var(--navy);
+}
+.opp-grid { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.15rem 0.6rem; font-size: 0.9rem; margin-top: 0.4rem; }
+.opp-grid b { color: var(--navy); font-weight: 600; }
+.badge {
+  display: inline-block; padding: 0.1rem 0.5rem; margin-right: 0.35rem; font-size: 0.72rem;
+  letter-spacing: 0.05em; border: 1px solid; border-radius: 2px;
+}
+.badge-sim { color: var(--warn); border-color: var(--warn); }
+.badge-ver { color: #1F5C45; border-color: #1F5C45; }
+.badge-unv { color: var(--muted); border-color: var(--muted); }
+.badge-genuine { color: #F7F3EC; background: var(--teal); border-color: var(--teal); }
+.badge-distraction { color: #F7F3EC; background: var(--warn); border-color: var(--warn); }
+.badge-review { color: var(--navy); background: var(--teal-soft); border-color: var(--teal-soft); }
+.next-action { margin-top: 0.5rem; color: var(--navy); font-weight: 600; }
 </style>
 """
 
@@ -105,7 +133,11 @@ MODULE_STATUS = {
     "My Attention": ("Operational", "status-op"),
     "My Calendar": ("Operational", "status-op"),
     "My People": ("Simulated integration", "status-sim"),
-    "My Network": ("Planned / not implemented", "status-plan"),
+    "Strategic Radar": (
+        "Simulated discovery (illustrative fixtures) · research-to-action Operational",
+        "status-sim",
+    ),
+    "My Network": ("Simulated — illustrative graph; 1 verified public fact", "status-sim"),
     "My Career": ("Planned / not implemented", "status-plan"),
     "My Financial Future": ("Simulated integration", "status-sim"),
     "Agent Activity": ("Operational", "status-op"),

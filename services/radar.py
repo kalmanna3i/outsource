@@ -348,9 +348,11 @@ class RadarEngine:
                 "status": "COMPLETED",
                 "subject": f"Introduction — {opp.category or opp.title}",
                 "body": (
-                    f"Hello,\n\nI'm Kay Al Mannai, an MBA candidate at Yale SOM. {opp.why}. "
-                    f"I'd value {opp.how.lower() if opp.how else 'a brief conversation'}.\n\n"
-                    f"Topics I'd love to cover: {'; '.join(opp.conversation_topics[:2]) or 'your current work'}.\n\n"
+                    "Hello,\n\nI'm Kay Al Mannai, an MBA candidate at Yale SOM. "
+                    f"I'm reaching out about: {opp.what or opp.description}.\n\n"
+                    f"Why it matters to me: {opp.why or opp.mission_alignment_reason}.\n\n"
+                    "Would you be open to a brief conversation? Topics I'd value your view on: "
+                    f"{'; '.join(opp.conversation_topics[:2]) or 'your current work'}.\n\n"
                     "Thank you for considering it,\nKay"
                 ),
             }],

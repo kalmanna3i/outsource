@@ -32,6 +32,7 @@ from database.db import (
 from services.finance import project_cashflow
 from services.workflow import WorkflowEngine
 from ui.contextual_page import render_contextual
+from ui.radar_page import render_network_graph, render_radar, render_radar_settings
 from ui.theme import CUSTOM_CSS, MODULE_STATUS
 
 st.set_page_config(
@@ -78,6 +79,7 @@ def header() -> None:
 
 NAV = [
     "Daily Briefing",
+    "Strategic Radar",
     "My Life Blueprint",
     "My Decisions",
     "My Work",
@@ -253,6 +255,23 @@ def page_blueprint() -> None:
     bp.academic = cols[1].text_input("Academic", bp.academic)
     bp.financial = cols[0].text_input("Financial", bp.financial)
     bp.relationships = cols[1].text_input("Relationships", bp.relationships)
+    st.markdown("### Personal Constitution (used by Strategic Radar)")
+    bp.mission = st.text_area("Mission", bp.mission, height=70)
+    bp.guiding_principles = [
+        line.strip()
+        for line in st.text_area(
+            "Guiding principles (one per line)", "\n".join(bp.guiding_principles)
+        ).splitlines()
+        if line.strip()
+    ]
+    bp.strategic_objectives = [
+        line.strip()
+        for line in st.text_area(
+            "Strategic objectives (one per line, 'area: objective')",
+            "\n".join(bp.strategic_objectives),
+        ).splitlines()
+        if line.strip()
+    ]
     if st.button("Save blueprint"):
         save_blueprint(bp)
         st.success("Saved.")
@@ -374,10 +393,12 @@ def page_people() -> None:
 def page_network() -> None:
     st.subheader("My Network")
     st.markdown(
-        '<p class="status-plan">Planned / not implemented — live research networking '
-        "requires SEARCH_API_KEY and is out of Priority 0 scope.</p>",
+        '<p class="status-sim">Simulated — illustrative strategic network from Strategic Radar '
+        "fixtures. Live relationship research is not wired (needs an authorized search "
+        "integration).</p>",
         unsafe_allow_html=True,
     )
+    render_network_graph()
 
 
 def page_career() -> None:
@@ -429,7 +450,8 @@ def page_activity() -> None:
     st.subheader("Agent Activity")
     wf: WorkflowState | None = st.session_state.workflow
     if not wf:
-        st.info("No agent calls yet.")
+        st.info("No Priority 0 agent calls yet.")
+        _radar_activity()
         return
     total_in = sum(c.input_tokens or 0 for c in wf.agent_calls)
     total_out = sum(c.output_tokens or 0 for c in wf.agent_calls)
@@ -460,6 +482,26 @@ def page_activity() -> None:
     st.markdown("### State transitions")
     for t in wf.transitions:
         st.text(f"{t['at']}: {t['from']} → {t['to']}  ({t.get('note','')})")
+    _radar_activity()
+
+
+def _radar_activity() -> None:
+    calls = []
+    run = st.session_state.get("radar_run")
+    if run:
+        calls += run.agent_calls
+    pkg = st.session_state.get("radar_exec")
+    if pkg:
+        calls += pkg.agent_calls
+    if not calls:
+        return
+    st.markdown("### Strategic Radar agent calls")
+    for c in calls:
+        cost = f"${c.cost_usd:.6f}" if c.cost_known and c.cost_usd is not None else "UNKNOWN"
+        st.markdown(
+            f"**{c.agent_id} {c.role}** · `{c.mode}` · success={c.success} · cost={cost}  \n"
+            f"{scrub_secrets(c.summary)}"
+        )
 
 
 def page_settings() -> None:
@@ -494,6 +536,7 @@ def page_settings() -> None:
     cleaned, findings = guard_external_content(sample)
     st.code(cleaned)
     st.write(findings)
+    render_radar_settings()
     if st.button("Reset demo data"):
         reset_demo_data()
         st.session_state.workflow = None
@@ -505,6 +548,7 @@ def main() -> None:
     page = sidebar()
     {
         "Daily Briefing": page_briefing,
+        "Strategic Radar": render_radar,
         "My Life Blueprint": page_blueprint,
         "My Decisions": page_decisions,
         "My Work": page_work,
