@@ -62,10 +62,12 @@ class Settings:
 
     @property
     def model(self) -> str:
+        # Never invent a course-key model. Prefer explicit OPENAI_MODEL.
         if self.openai_model:
             return self.openai_model
         if self.portkey_api_key and not self.openai_api_key:
-            return "gpt-5.1-codex"
+            # Course key: set OPENAI_MODEL to the professor-allowed model only.
+            return os.getenv("PORTKEY_MODEL") or "gpt-4o-mini"
         return "gpt-4o-mini"
 
     @property

@@ -38,8 +38,8 @@ export OPENAI_API_KEY=...          # or PORTKEY_API_KEY for the course key
 streamlit run app.py
 ```
 
-- Course key: use `PORTKEY_API_KEY` with the course-allowed model only.
-- Personal key: use `OPENAI_API_KEY` and pay yourself.
+- Course key: use `PORTKEY_API_KEY` and set `OPENAI_MODEL` to the **course-allowed model only** (see syllabus / project requirements).
+- Personal key: use `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`) and pay yourself.
 - If live is requested but no key is found, the UI falls back to **demo** and says so.
 
 Never commit a real `.env`.
