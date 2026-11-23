@@ -74,7 +74,7 @@ AGENT_TABLE_ROWS = """
 def render_expanded_report(
     *,
     repo: str,
-    main_sha: str = "858e339",
+    main_sha: str = "",
     arch_svg: str,
     safety_test: str,
     trace: dict[str, Any],
