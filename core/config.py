@@ -17,14 +17,15 @@ APP_ROOT = Path(__file__).resolve().parent.parent
 
 
 def _load_env() -> None:
+    """Course layout: parent `submissions/.env`, then repo `.env` overrides."""
     local = APP_ROOT / ".env"
     parent = APP_ROOT.parent / ".env"
-    if local.exists():
-        load_dotenv(local)
-    elif parent.exists():
+    if parent.exists():
         load_dotenv(parent)
-    else:
-        load_dotenv()  # process env / cwd only
+    if local.exists():
+        load_dotenv(local, override=True)
+    if not parent.exists() and not local.exists():
+        load_dotenv()
 
 
 _load_env()
@@ -66,8 +67,8 @@ class Settings:
         if self.openai_model:
             return self.openai_model
         if self.portkey_api_key and not self.openai_api_key:
-            # Course key: set OPENAI_MODEL to the professor-allowed model only.
-            return os.getenv("PORTKEY_MODEL") or "gpt-4o-mini"
+            # Course key: gpt-6-luna only (MGT 409 project requirements).
+            return os.getenv("OPENAI_MODEL") or "gpt-6-luna"
         return "gpt-4o-mini"
 
     @property

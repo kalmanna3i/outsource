@@ -10,6 +10,8 @@ __pycache__/
 data/*.db
 data/*.db-journal
 *.ics
+deliverables/screenshots/*.png
+deliverables/screenshots/manifest.b64.json
 .DS_Store
 dist/
 build/

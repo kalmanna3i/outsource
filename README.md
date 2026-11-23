@@ -1,58 +1,54 @@
 # OUTSOURCE — Personal Strategy & Execution Office
 
-**Kay Al Mannai · Yale SOM · MGT 409 AI Foundations for Managers**
+**Public repo:** https://github.com/kalmanna3i/outsource  
+**Kay Al Mannai · Yale SOM · MGT 409**
 
 > Know what matters. Do what only you can. Delegate the rest.
 
-OUTSOURCE is a multi-agent Streamlit app that reads your life goals, runs opportunity-cost decisions across competing obligations, allocates work to AI vs human, executes what AI can do, and — when it hits a real barrier (demo: insurer identity verification) — prepares a human intervention brief, schedules a calendar slot, exports ICS, then resumes after you enter the result.
+OUTSOURCE is a multi-agent Streamlit app: read goals → opportunity-cost decisions → AI vs human allocation → execute drafts → hit a simulated insurer identity wall → human brief + ICS → resume after your result.
 
-## Quick start (≤10 minutes)
+## Quick start (under 10 minutes)
+
+Requirements: **Python 3.11+** (3.12 OK), `git`, internet for `pip install`.
 
 ```bash
+git clone https://github.com/kalmanna3i/outsource.git
 cd outsource
 python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env        # optional; demo mode works with no keys
 streamlit run app.py
 ```
 
-Default mode is **demo** (`APP_MODE=demo`): labeled fixtures, no API spend. Open the URL Streamlit prints (usually http://localhost:8501).
+Open the URL shown (usually http://localhost:8501). Default **`APP_MODE=demo`** — no API key required.
 
-### Course grading `.env` layout
+Optional: `cp .env.example .env` and set `APP_MODE=live` plus keys (see below).
 
-The app loads `.env` from the project folder first, then **one level up** (teaching-staff layout):
+## API keys (course grading layout)
+
+The app loads environment variables from:
+
+1. **Parent folder** `.env` (teaching-staff batch layout)  
+2. **Repo folder** `.env` (overrides parent)
 
 ```
 submissions/
-├── .env                 ← PORTKEY_API_KEY / OPENAI_API_KEY
-└── outsource/           ← this repo
+├── .env                 ← staff keys here
+└── outsource/           ← this repo (clone)
 ```
 
-### Live mode (optional)
+**Exact variable names:** `PORTKEY_API_KEY` and/or `OPENAI_API_KEY` (spelled exactly).
 
-```bash
-export APP_MODE=live
-export OPENAI_API_KEY=...          # or PORTKEY_API_KEY for the course key
-# optional: OPENAI_BASE_URL=...  OPENAI_MODEL=...
-streamlit run app.py
-```
+- **Course key:** `PORTKEY_API_KEY` + `OPENAI_MODEL=gpt-6-luna` (Portkey) — only this model on the course key.  
+- **Personal key:** `OPENAI_API_KEY` (+ optional `OPENAI_MODEL`).
 
-- Course key: use `PORTKEY_API_KEY` and set `OPENAI_MODEL` to the **course-allowed model only** (see syllabus / project requirements).
-- Personal key: use `OPENAI_API_KEY` (and optionally `OPENAI_MODEL`) and pay yourself.
-- If live is requested but no key is found, the UI falls back to **demo** and says so.
+See `.env.example`. Never commit a real `.env`.
 
-Never commit a real `.env`.
+If `APP_MODE=live` but no key is present, the UI **falls back to demo** and labels it.
 
-## Priority 0 demo path
+## Priority 0 demo
 
-On **Daily Briefing**, keep (or paste) this request and click **Run Priority 0 workflow**:
-
-> I need to finish my MBA final tonight, attend a wedding, handle an important work obligation, and find out what is happening with my insurance claim.
-
-You should see: goals read → opportunity-cost plan → AI vs human packages → AI drafts → simulated insurer identity wall → private intervention brief → calendar slot + **Download ICS** → paste a human result → resume + follow-ups. Inspect **Agent Activity** for per-agent calls and costs (UNKNOWN in demo).
-
-Full narration: [`deliverables/demo_script.md`](deliverables/demo_script.md).
+**Daily Briefing** → use the default request → **Run Priority 0 workflow** → download **ICS** → paste a human result → **Submit result & resume** → check **Agent Activity**.
 
 ## Tests
 
@@ -60,19 +56,10 @@ Full narration: [`deliverables/demo_script.md`](deliverables/demo_script.md).
 APP_MODE=demo pytest -q tests/
 ```
 
+## Canvas submission
+
+Upload **only** `deliverables/report.html` and `deliverables/slides.html` to Canvas (repo URL is inside both files). Full code stays in this GitHub repo.
+
 ## Honest status
 
-See [`BUILD_STATUS.md`](BUILD_STATUS.md). Email/calls/purchases and live insurer APIs are **not** implemented. Networking and career modules are **planned**.
-
-## Deliverables
-
-| File | Purpose |
-|---|---|
-| `deliverables/report.html` | Course report (self-contained) |
-| `deliverables/slides.html` | reveal.js deck ≤10 slides |
-| `deliverables/demo_script.md` | Demo narration |
-| `BUILD_STATUS.md` | Operational vs simulated vs planned |
-
-## Stack
-
-Python 3.11+, Streamlit, Pydantic, SQLite, OpenAI-compatible client, Plotly, pytest.
+See `BUILD_STATUS.md` — insurer portal and CRM are simulated; Network/Career are planned.
