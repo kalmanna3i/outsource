@@ -226,3 +226,25 @@ def list_people() -> list[PersonProfile]:
 
 def reset_demo_data() -> None:
     init_db(reset=True)
+
+
+def get_permission_mode() -> str:
+    init_db()
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT value FROM settings_kv WHERE key = 'permission_mode'"
+        ).fetchone()
+        return row["value"] if row else "MANAGED_AUTONOMY"
+
+
+def set_permission_mode(mode: str) -> None:
+    init_db()
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO settings_kv (key, value) VALUES ('permission_mode', ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            """,
+            (mode,),
+        )
+        conn.commit()

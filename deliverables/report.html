@@ -5,45 +5,23 @@
 <title>OUTSOURCE — MGT 409 Final Report — Kay Al Mannai</title>
 <style>
   @page { size: letter; margin: 0.85in; }
-  :root {
-    --navy: #0B1F33; --teal: #3F6F7A; --ivory: #F7F3EC; --ink: #1A2430; --line: #D9D2C5;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
-    color: var(--ink); background: var(--ivory); line-height: 1.55;
-    max-width: 8.5in; margin: 0 auto; padding: 0.9in 0.95in 1.1in;
-  }
-  h1,h2,h3 { font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif; color: var(--navy); line-height: 1.2; }
-  h1 { font-size: 2.2rem; margin-bottom: 0.2rem; }
-  h2 { font-size: 1.45rem; border-bottom: 2px solid var(--teal); padding-bottom: 0.25rem; margin-top: 1.8rem; page-break-after: avoid; }
-  h3 { font-size: 1.15rem; margin-top: 1.1rem; }
-  .tag { color: var(--teal); letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.8rem; }
-  .meta { color: #5C6B7A; margin-bottom: 1.2rem; }
-  a { color: var(--teal); }
-  table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1rem; font-size: 0.92rem; }
-  th, td { border: 1px solid var(--line); padding: 0.45rem 0.55rem; text-align: left; vertical-align: top; }
-  th { background: #E8EEF0; }
-  .callout { background: #EAF1F2; border-left: 4px solid var(--teal); padding: 0.7rem 0.9rem; margin: 0.9rem 0; }
-  .warn { background: #F3E8DA; border-left: 4px solid #8A5A2B; padding: 0.7rem 0.9rem; margin: 0.9rem 0; }
-  .diagram {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    background: #0B1F33; color: #F7F3EC; padding: 1rem; font-size: 0.78rem;
-    white-space: pre; overflow-x: auto; line-height: 1.35;
-  }
-  .shot {
-    border: 1px solid var(--line); background: white; padding: 0.8rem 1rem; margin: 0.8rem 0 1rem;
-  }
-  .shot .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: #5C6B7A; }
-  .kpi-row { display: flex; gap: 0.6rem; flex-wrap: wrap; }
-  .kpi { flex: 1; min-width: 120px; background: white; border: 1px solid var(--line); padding: 0.6rem 0.7rem; }
-  .kpi b { display: block; font-family: Georgia, serif; font-size: 1.3rem; color: var(--navy); }
-  ul { padding-left: 1.2rem; }
-  .footer { margin-top: 2rem; font-size: 0.85rem; color: #5C6B7A; border-top: 1px solid var(--line); padding-top: 0.6rem; }
-  @media print {
-    body { background: white; padding: 0; }
-    .shot, .diagram, table { break-inside: avoid; }
-  }
+  :root { --navy:#0B1F33; --teal:#3F6F7A; --ivory:#F7F3EC; --ink:#1A2430; --line:#D9D2C5; }
+  body { font-family:"Source Sans 3","Segoe UI",Helvetica,Arial,sans-serif; color:var(--ink); background:var(--ivory); line-height:1.55; max-width:8.5in; margin:0 auto; padding:0.9in 0.95in 1.1in; }
+  h1,h2,h3 { font-family:"Cormorant Garamond",Georgia,"Times New Roman",serif; color:var(--navy); line-height:1.2; }
+  h1 { font-size:2.2rem; margin-bottom:0.2rem; }
+  h2 { font-size:1.45rem; border-bottom:2px solid var(--teal); padding-bottom:0.25rem; margin-top:1.8rem; }
+  .tag { color:var(--teal); letter-spacing:0.08em; text-transform:uppercase; font-size:0.8rem; }
+  .meta { color:#5C6B7A; margin-bottom:1.2rem; }
+  table { width:100%; border-collapse:collapse; margin:0.8rem 0 1rem; font-size:0.92rem; }
+  th,td { border:1px solid var(--line); padding:0.45rem 0.55rem; text-align:left; vertical-align:top; }
+  th { background:#E8EEF0; }
+  .callout { background:#EAF1F2; border-left:4px solid var(--teal); padding:0.7rem 0.9rem; margin:0.9rem 0; }
+  .warn { background:#F3E8DA; border-left:4px solid #8A5A2B; padding:0.7rem 0.9rem; margin:0.9rem 0; }
+  .diagram { font-family:ui-monospace,Menlo,Consolas,monospace; background:#0B1F33; color:#F7F3EC; padding:1rem; font-size:0.78rem; white-space:pre; line-height:1.35; }
+  .shot { border:1px solid var(--line); background:white; padding:0.8rem 1rem; margin:0.8rem 0 1rem; }
+  .shot .label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.06em; color:#5C6B7A; }
+  .footer { margin-top:2rem; font-size:0.85rem; color:#5C6B7A; border-top:1px solid var(--line); padding-top:0.6rem; }
+  @media print { body { background:white; padding:0; } }
 </style>
 </head>
 <body>
@@ -52,179 +30,127 @@
 <h1>OUTSOURCE</h1>
 <p><strong>Personal Strategy &amp; Execution Office</strong></p>
 <p class="meta">
-  Kay Al Mannai · November 23, 2026<br/>
-  GitHub repo: <em>submit the public/private repo URL on Canvas</em><br/>
-  App: run locally with <code>streamlit run app.py</code> (see README)<br/>
-  One-liner: OUTSOURCE decides what deserves your attention, does the AI-eligible work, and prepares you for the exact moment only a human can unblock.
+  Kay Al Mannai · November 23, 2026 (America/New_York)<br/>
+  GitHub repo: <em>submit Canvas URL after push — not created from the build VM</em><br/>
+  App: local — <code>streamlit run app.py</code> (see README)<br/>
+  One-liner: OUTSOURCE reads goals, compares opportunity costs, assigns AI vs human work, and stages the exact human intervention when automation hits a wall.
 </p>
+
+<div class="warn">
+<strong>Evidence policy:</strong> This report only claims what was verified in-repo on 2026-11-23:
+<code>APP_MODE=demo pytest</code> → 14 passed; mandatory demo workflow completed in demo mode.
+No API keys were present, so <strong>live model token counts were not measured</strong>. No web research citations were produced.
+</div>
 
 <h2>2. Motivation</h2>
 <p>
-Knowledge workers — MBA students, founders, operators — juggle hard deadlines, relationship obligations, career asks, and administrative walls in the same evening. Today’s coping tools are calendars, to-do lists, and generic chatbots. Calendars do not know goal importance. To-do lists do not compute opportunity cost. Chatbots draft text but happily “complete” tasks that actually require identity verification, presence, or signature.
+MBA students and operators often face the same evening: a hard academic deadline, a fixed personal obligation, a work ask, and an administrative portal that will not yield without human identity verification. Calendars do not know goal importance. Unconstrained chatbots invent completed phone calls. Task lists do not prepare a private brief and a public calendar invite when a human gate appears.
 </p>
 <p>
-The cost is not only hours. It is misallocated attention: polishing a low-leverage email while a fixed wedding window approaches, or pretending an insurance portal can be automated when the real blocker is a human identity check. OUTSOURCE exists for people who need a chief-of-staff pattern: understand goals, compare options, assign AI vs human honestly, execute what is executable, and stage the human intervention.
+OUTSOURCE is built as a personal chief-of-staff pattern: understand goals, decide what deserves scarce attention, let AI draft what is draftable, and bring the human in only when required — prepared.
 </p>
 
 <h2>3. What is new here</h2>
-<p>
-Existing products nearby: Motion / Reclaim (calendar autopilot), ChatGPT / Copilot (general drafting), Notion AI (docs), personal CRM tools, and insurer apps themselves. Closest substitutes fail in different ways:
-</p>
 <ul>
-  <li><strong>Calendar autopilots</strong> optimize free/busy, not life-goal opportunity cost.</li>
-  <li><strong>General LLMs</strong> will invent completed actions (“I called the insurer”) unless constrained.</li>
-  <li><strong>Task managers</strong> do not prepare private briefs + public ICS when a human gate appears.</li>
+  <li>Motion/Reclaim optimize free/busy, not life-goal opportunity cost.</li>
+  <li>General LLMs will claim they “called the insurer” unless hard-stopped.</li>
+  <li>Task managers rarely separate private intervention briefs from public ICS text.</li>
 </ul>
 <p>
-OUTSOURCE’s twist: a <em>strategy-aware execution office</em> that treats human attention as the scarce resource. When work hits a barrier that AI cannot clear (demo: insurer identity verification), the system does not fake success — it prepares the intervention, schedules it, exports ICS without leaking sensitive details, and resumes after the user’s result.
+OUTSOURCE’s difference: strategy-aware allocation plus an honest handoff when AI cannot proceed. The insurer path is a <em>labeled simulation</em>, not a fake success.
 </p>
 
 <h2>4. The agents</h2>
-<p>Priority 0 agents each make an independent model call in <code>APP_MODE=live</code>. In <code>demo</code>, each returns a labeled fixture (never presented as a live call).</p>
-
 <table>
-  <thead><tr><th>ID</th><th>Role</th><th>Job</th><th>Tools / outputs</th></tr></thead>
+  <thead><tr><th>ID</th><th>Role</th><th>Demo</th><th>Live (code)</th></tr></thead>
   <tbody>
-    <tr><td>A01</td><td>Chief of Staff</td><td>Intake, constraints, specialist routing</td><td>Structured intake JSON</td></tr>
-    <tr><td>A02</td><td>Life Strategy Architect</td><td>Read Life Blueprint goals; score alignment</td><td>Goal readout</td></tr>
-    <tr><td>B01</td><td>Opportunity Cost Economist</td><td>Compare time/attention options</td><td>Options, sequence, tradeoffs</td></tr>
-    <tr><td>F02</td><td>Task Decomposition</td><td>AI / HUMAN / DELEGATED packages</td><td>Work packages</td></tr>
-    <tr><td>F03</td><td>Autonomous Execution</td><td>Produce digital drafts only</td><td>Deliverable summaries; escalate blockers</td></tr>
-    <tr><td>F04</td><td>Calendar &amp; Logistics</td><td>Request slots; ICS via scheduler</td><td>Scheduling requests → ICS</td></tr>
-    <tr><td>F05</td><td>Human Handoff</td><td>Private intervention brief</td><td>Talking points, documents ready</td></tr>
-    <tr><td>F06</td><td>Follow-Up</td><td>Resume after human result</td><td>Follow-ups, closure</td></tr>
+    <tr><td>A01</td><td>Chief of Staff</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
+    <tr><td>A02</td><td>Life Strategy Architect</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
+    <tr><td>B01</td><td>Opportunity Cost Economist</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
+    <tr><td>F02</td><td>Task Decomposition</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
+    <tr><td>F03</td><td>Autonomous Execution</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
+    <tr><td>F04</td><td>Calendar &amp; Logistics</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
+    <tr><td>F05</td><td>Human Handoff</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
+    <tr><td>F06</td><td>Follow-Up</td><td>Labeled fixture</td><td>Independent chat completion</td></tr>
   </tbody>
 </table>
-
-<p><strong>Models:</strong> Live mode uses whatever is configured (<code>OPENAI_MODEL</code>, or course Portkey default). Demo mode uses no model. Token prices are never hardcoded as facts for demo runs.</p>
+<p>Network/Career modules are <strong>Planned</strong> UI stubs — not fake agents.</p>
 
 <div class="diagram">User request
-   │
-   ▼
- A01 Chief of Staff ──► A02 Strategy (goals)
-   │
-   ▼
- B01 Opportunity Cost ──► recommended plan
-   │
-   ▼
- F02 Decomposition ──► AI vs HUMAN packages
-   │
-   ▼
- F03 Execution ──► digital drafts
-   │
-   ▼
- Simulated insurer check ──► IDENTITY WALL
-   │
-   ▼
- F05 Handoff brief ──► F04 schedule + ICS
-   │
-   ▼
- User enters result ──► F06 follow-up ──► COMPLETED
-</div>
+ → A01 intake → A02 goals → B01 opportunity cost
+ → F02 decompose → [permission gate] → F03 execute
+ → simulated insurer identity wall
+ → F05 brief → F04 schedule + ICS
+ → user result → F06 follow-up → COMPLETED</div>
 
-<h3>One real run (demo mode, 2026-11-23)</h3>
-<p>Request: finish MBA final tonight, attend a wedding, handle a work obligation, check an insurance claim.</p>
-
-<div class="kpi-row">
-  <div class="kpi"><span>Status path</span><b>INTAKE → … → WAITING_RESULT → COMPLETED</b></div>
-  <div class="kpi"><span>Agent calls</span><b>8</b> (7 + F06 on resume)</div>
-  <div class="kpi"><span>Mode</span><b>DEMO (labeled)</b></div>
-</div>
+<h3>Verified demo run (2026-11-23)</h3>
+<p>Request: finish MBA final tonight, attend wedding, handle work obligation, check insurance claim.</p>
+<ul>
+  <li>Status path: ANALYZING → PLANNED → EXECUTING → BLOCKED_HUMAN → WAITING_RESULT → RESUMING → COMPLETED</li>
+  <li>Agent steps before resume: A01, A02, B01, F02, F03, F05, F04 (all <code>mode=demo</code>, tokens UNKNOWN)</li>
+  <li>Evidence types: USER_PROVIDED, SIMULATED_FIXTURE (no VERIFIED_SOURCE)</li>
+  <li>Intervention fields populated; ICS file written; sensitive talking points not in ICS</li>
+  <li>After user result: F06 follow-ups written; status COMPLETED</li>
+</ul>
 
 <div class="shot">
-  <div class="label">Screenshot stand-in — Daily Briefing after run</div>
-  <p><strong>OUTSOURCE</strong> · Mode: DEMO · Status: WAITING_RESULT · Intervention: “Complete insurer identity verification” · ICS downloadable · Private brief lists Photo ID + CLAIM-SIM-409 (not copied into ICS).</p>
+  <div class="label">Verified console evidence (not a UI screenshot)</div>
+  <p><code>status WAITING_RESULT</code> · <code>calls [('A01','demo',None,False,None), …]</code> · <code>evidence_types ['SIMULATED_FIXTURE','USER_PROVIDED']</code> · <code>hi_fields_ok True</code> · <code>final COMPLETED</code> · <code>LIVE_KEYS False</code></p>
 </div>
 
-<div class="shot">
-  <div class="label">Screenshot stand-in — My Decisions</div>
-  <p>Recommended sequence: AI MBA checklist → AI work draft → AI insurance check → HUMAN identity verification → HUMAN wedding → HUMAN final submit. Tradeoff called out: skipping the wedding saves hours but violates a priority-9 relationship goal.</p>
-</div>
-
-<div class="shot">
-  <div class="label">Screenshot stand-in — Agent Activity</div>
-  <p>A01, A02, B01, F02, F03, F05, F04 each logged with <code>[DEMO FIXTURE]</code>. Cost: UNKNOWN (no token meter in demo). Live mode would show prompt/completion tokens when the provider returns usage.</p>
-</div>
-
-<ol>
-  <li>Blueprint goals loaded (academic 10, wedding 9, work 8, insurance 7).</li>
-  <li>A01 listed four obligations + constraints (11:59 PM ET; fixed wedding; identity gate).</li>
-  <li>B01 produced opportunity-cost options with qualitative value separated from money.</li>
-  <li>F02 labeled packages AI vs HUMAN.</li>
-  <li>F03 created MBA checklist + work draft; insurance package blocked.</li>
-  <li>Simulated insurer returned IDENTITY_VERIFICATION_REQUIRED (evidence type SIMULATED_FIXTURE).</li>
-  <li>F05 prepared private brief; F04 booked a pre-wedding business-hours slot; ICS written.</li>
-  <li>User result entered → F06 follow-ups → COMPLETED.</li>
-</ol>
+<p><strong>Structured handoffs:</strong> each agent’s JSON is passed into the next prompt; DecisionPlan / WorkPackages / HumanIntervention are built from those dicts in <code>services/workflow.py</code>.</p>
 
 <h2>5. Tokenomics</h2>
-<p>
-<strong>Demo run (mandatory proof path):</strong> 0 billed tokens. Cost = UNKNOWN / $0. Fixtures are labeled so they cannot be mistaken for measured usage.
-</p>
-<p>
-<strong>Live run (when a key is present):</strong> each specialist is a separate chat completion. The app records <code>prompt_tokens</code>, <code>completion_tokens</code>, optional cached tokens, and an <em>estimate</em> from a small public price table when the model is recognized — otherwise cost stays UNKNOWN rather than inventing a number.
-</p>
-
 <table>
-  <thead><tr><th>Scenario</th><th>Calls / run</th><th>Tokens</th><th>Cost basis</th></tr></thead>
+  <thead><tr><th>Scenario</th><th>Verified?</th><th>Tokens / cost</th></tr></thead>
   <tbody>
-    <tr><td>Demo Priority 0</td><td>8 structured agent steps</td><td>0 (fixtures)</td><td>UNKNOWN / $0</td></tr>
-    <tr><td>Live Priority 0 (expected shape)</td><td>~8 completions</td><td>Measured from API usage object</td><td>Estimated from usage × list prices, or UNKNOWN</td></tr>
-    <tr><td>Per user / month (est. 20 runs)</td><td>~160 calls</td><td>20 × measured</td><td>20 × measured run cost</td></tr>
-    <tr><td>100 users</td><td>—</td><td>—</td><td>100 × monthly</td></tr>
-    <tr><td>10,000 users</td><td>—</td><td>—</td><td>10,000 × monthly (needs caching + shorter prompts)</td></tr>
+    <tr><td>Demo Priority 0 (this QA)</td><td>Yes</td><td>0 billed; cost UNKNOWN; fixtures labeled</td></tr>
+    <tr><td>Live Priority 0</td><td>No — no API key in QA env</td><td>Code records prompt/completion tokens when API returns usage; USD estimate only if model is in a small price table, else UNKNOWN</td></tr>
+    <tr><td>100 / 10,000 users</td><td>Estimate only</td><td>Scale = users × measured live run cost (unavailable here)</td></tr>
   </tbody>
 </table>
-
 <div class="callout">
-<strong>Cost controls actually built:</strong> <code>MAX_AGENT_CALLS</code> (default 25) and <code>MAX_WORKFLOW_COST_USD</code> (default 2.00) raise <code>BudgetExceeded</code> before another live call. Demo mode avoids spend entirely. Prompt style asks for JSON-only structured outputs to limit completion length.
+Cost controls verified in tests: <code>MAX_AGENT_CALLS</code> raises <code>BudgetExceeded</code>; <code>MAX_WORKFLOW_COST_USD</code> checked before live calls. Demo mode spends $0.
 </div>
-<p>
-Tradeoff: aggressive truncation can hurt brief quality. We preferred spend caps + demo fixtures over silently degrading outputs. No fake “we saved 40%” claim without a paired A/B measurement in this submission.
-</p>
 
 <h2>6. Safety</h2>
 <ul>
-  <li><strong>Prompt injection:</strong> untrusted input is scanned for instruction-override patterns and wrapped with an explicit “data not commands” quarantine banner (<code>core/safety.py</code>).</li>
-  <li><strong>Secret leakage:</strong> API-key-like strings are scrubbed to <code>[REDACTED]</code> before display/logs.</li>
-  <li><strong>Agent malfunction:</strong> agents may not claim external side effects (emails sent, purchases). Insurer module is a labeled simulation.</li>
-  <li><strong>Overspend:</strong> hard caps on calls and estimated USD in live mode.</li>
-  <li><strong>Privacy:</strong> ICS public description excludes claim IDs and ID instructions; those stay in the private brief.</li>
+  <li>Prompt-injection heuristics quarantine untrusted text (<code>core/safety.py</code>; pytest).</li>
+  <li>Secret-like strings redacted to <code>[REDACTED]</code>.</li>
+  <li>Agents must not invent external side effects; insurer is explicitly simulated.</li>
+  <li>REVIEW_ALL blocks F03 until the user checks Approve (pytest).</li>
+  <li>ICS public description excludes private brief contents (pytest).</li>
 </ul>
 
 <div class="shot">
-  <div class="label">Defense evidence — Settings safety self-check</div>
-  <p>Input containing “Ignore previous instructions…” and <code>api_key=sk-…</code> yields findings <code>prompt_injection_heuristic</code> + <code>secret_like_content</code>, quarantined text, and redaction. Covered by <code>tests/test_safety.py</code>.</p>
+  <div class="label">Defense evidence</div>
+  <p><code>tests/test_safety.py</code>, <code>tests/test_permissions_budget.py</code>, <code>tests/test_intervention_fields.py</code> — all passing in the 14-test suite.</p>
 </div>
 
 <h2>7. Impact</h2>
-<p>
-<strong>Primary user:</strong> Kay Al Mannai (builder-user) on the Nov 23, 2026 deadline evening scenario.
-</p>
 <table>
-  <thead><tr><th>Metric</th><th>Baseline (manual juggling)</th><th>With OUTSOURCE (measured in demo run)</th><th>Source</th></tr></thead>
+  <thead><tr><th>Claim</th><th>Status</th><th>Source</th></tr></thead>
   <tbody>
-    <tr><td>Time to produce a sequenced plan across 4 obligations</td><td>~20–40 min of ad-hoc prioritization</td><td>&lt;1 min to structured plan + packages</td><td>Local demo run timing</td></tr>
-    <tr><td>Risk of “AI said it called the insurer”</td><td>High with unconstrained chat</td><td>Blocked; human intervention required</td><td>Workflow status WAITING_RESULT</td></tr>
-    <tr><td>Calendar leak of sensitive claim details</td><td>Common when copying chat into calendar</td><td>ICS contains public text only</td><td>ICS file inspection in tests</td></tr>
-    <tr><td>Follow-through after human call</td><td>Easy to forget next steps</td><td>F06 writes follow-ups on resume</td><td>Workflow COMPLETED + follow_ups list</td></tr>
+    <tr><td>End-to-end plan + handoff produced for the 4-obligation prompt</td><td>Verified</td><td>Demo run + E2E test</td></tr>
+    <tr><td>Blocks false “AI completed insurer verification”</td><td>Verified</td><td>Status WAITING_RESULT until human result</td></tr>
+    <tr><td>ICS without private talking points / document list</td><td>Verified</td><td>ICS assertions in tests</td></tr>
+    <tr><td>Hours saved vs manual prioritization</td><td><strong>Not measured</strong></td><td>No timed user study</td></tr>
+    <tr><td>Multi-user pilot</td><td><strong>Not done</strong></td><td>—</td></tr>
   </tbody>
 </table>
-<div class="warn">
-Impact numbers above are from the builder’s own demo runs and test assertions, not a multi-user pilot. A classroom or ops pilot would be the next evidence step for Tier-3 organizational claims.
-</div>
 
 <h2>8. Limits + next steps</h2>
 <ul>
-  <li>Live insurer, email, SMS, and purchases are not integrated.</li>
-  <li>Networking research and career-fork secondary demos are Planned.</li>
-  <li>Financial module is a deterministic teaching projection (taxes/retirement omitted).</li>
-  <li>Tokenomics in demo cannot show measured tokens — live keys required for that evidence.</li>
-  <li><strong>Next month:</strong> real calendar OAuth, optional email draft→approve→send, richer evidence ledger UI, and a small pilot with 3–5 managers measuring weekly attention hours recovered.</li>
+  <li>No live insurer, email, SMS, or purchases.</li>
+  <li>No VERIFIED_SOURCE research pipeline.</li>
+  <li>Live tokenomics not captured (no keys on build VM).</li>
+  <li>CUSTOM_AUTONOMY per-tool allowlist Planned.</li>
+  <li>GitHub push blocked here (<code>gh</code> unauthenticated) — required for Canvas.</li>
+  <li>Next: live-key token screenshot, calendar OAuth, small manager pilot.</li>
 </ul>
 
 <div class="footer">
-  OUTSOURCE · Kay Al Mannai · MGT 409 · Report generated for Canvas submission · See also slides.html, demo_script.md, BUILD_STATUS.md, README.md
+  OUTSOURCE · Kay Al Mannai · MGT 409 · QA-updated 2026-11-23 · See BUILD_STATUS.md for Operational / Simulated / Planned labels
 </div>
 </body>
 </html>

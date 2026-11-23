@@ -17,7 +17,9 @@ if str(ROOT) not in sys.path:
 from core.config import get_settings
 from core.models import WorkflowState
 from core.safety import guard_external_content, scrub_secrets
+from core.permissions import normalize_permission
 from database.db import (
+    get_permission_mode,
     init_db,
     list_people,
     list_workflows,
@@ -25,6 +27,7 @@ from database.db import (
     load_workflow,
     reset_demo_data,
     save_blueprint,
+    set_permission_mode,
 )
 from services.finance import project_cashflow
 from services.workflow import WorkflowEngine
@@ -128,6 +131,15 @@ def page_briefing() -> None:
             + ", ".join(f.kind for f in findings)
         )
 
+    perm = normalize_permission(get_permission_mode())
+    st.caption(f"Current permission mode: `{perm.value}` (change in Settings)")
+    approve = False
+    if perm.value == "REVIEW_ALL":
+        approve = st.checkbox(
+            "Approve AI execution for this run (required under REVIEW_ALL)",
+            value=False,
+        )
+
     col1, col2 = st.columns([1, 1])
     with col1:
         run = st.button("Run Priority 0 workflow", type="primary")
@@ -144,7 +156,12 @@ def page_briefing() -> None:
         st.session_state.logs = []
         with st.spinner("Running multi-agent workflow…"):
             engine = WorkflowEngine()
-            state = engine.run_priority0(cleaned, progress=_progress)
+            state = engine.run_priority0(
+                cleaned,
+                progress=_progress,
+                permission_mode=perm,
+                approve_ai_execution=approve,
+            )
             st.session_state.workflow = state
         st.success(
             f"Workflow {state.workflow_id} → {state.status.value} "
@@ -443,7 +460,23 @@ def page_settings() -> None:
     st.write(f"Has API credentials: **{settings.has_live_credentials}**")
     st.write(f"Max agent calls: {settings.max_agent_calls}")
     st.write(f"Max workflow cost USD: {settings.max_workflow_cost_usd}")
-    st.write("Permission mode: MANAGED_AUTONOMY (default)")
+    current = get_permission_mode()
+    choice = st.selectbox(
+        "Permission mode",
+        ["MANAGED_AUTONOMY", "REVIEW_ALL", "CUSTOM_AUTONOMY"],
+        index=["MANAGED_AUTONOMY", "REVIEW_ALL", "CUSTOM_AUTONOMY"].index(
+            current if current in ("MANAGED_AUTONOMY", "REVIEW_ALL", "CUSTOM_AUTONOMY") else "MANAGED_AUTONOMY"
+        ),
+        help="REVIEW_ALL blocks F03 until you check Approve on Daily Briefing. "
+        "MANAGED_AUTONOMY / CUSTOM_AUTONOMY allow AI packages to run.",
+    )
+    if st.button("Save permission mode"):
+        set_permission_mode(choice)
+        st.success(f"Saved permission mode: {choice}")
+    st.caption(
+        "CUSTOM_AUTONOMY currently behaves like MANAGED_AUTONOMY "
+        "(no per-tool allowlist UI yet — Planned)."
+    )
     st.markdown("#### Safety self-check")
     sample = st.text_input(
         "Paste text to scan",

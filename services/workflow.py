@@ -25,13 +25,26 @@ from core.models import (
     EvidenceType,
     HumanIntervention,
     OpportunityCostItem,
+    PermissionMode,
     TaskStatus,
     WorkPackage,
     WorkflowState,
 )
-from database.db import load_blueprint, save_workflow
+from core.permissions import may_auto_execute, normalize_permission
+from database.db import get_permission_mode, load_blueprint, save_workflow
 from services.insurer import check_claim_status
 from services.scheduler import export_ics, find_slot
+
+
+def _normalize_assignee(raw: object) -> str:
+    val = str(raw or "AI").strip().upper()
+    if val in ("AI", "HUMAN", "DELEGATED"):
+        return val
+    if "human" in val.lower():
+        return "HUMAN"
+    if "deleg" in val.lower():
+        return "DELEGATED"
+    return "AI"
 
 
 ProgressCb = Callable[[str], None]
@@ -254,13 +267,17 @@ class WorkflowEngine:
         user_request: str,
         progress: ProgressCb = _noop,
         now: datetime | None = None,
+        permission_mode: PermissionMode | None = None,
+        approve_ai_execution: bool = False,
     ) -> WorkflowState:
         now = now or datetime.now()
         mode = self.settings.effective_mode
+        perm = permission_mode or normalize_permission(get_permission_mode())
         bp = load_blueprint()
         state = WorkflowState(user_request=user_request, mode=mode, blueprint_snapshot=bp)
         state.transition(TaskStatus.ANALYZING, "Intake started")
         progress("Loading Life Blueprint goals…")
+        progress(f"Permission mode: {perm.value}")
 
         goals = [g.title for g in bp.goals]
         fixtures = _demo_fixtures(user_request, goals)
@@ -362,14 +379,27 @@ class WorkflowEngine:
         for wp in decomp.get("work_packages", []):
             state.work_packages.append(
                 WorkPackage(
-                    title=wp["title"],
-                    assignee=wp.get("assignee", "AI"),
+                    title=str(wp.get("title") or "Untitled package"),
+                    assignee=_normalize_assignee(wp.get("assignee")),  # type: ignore[arg-type]
                     rationale=wp.get("rationale") or "",
                     depends_on=list(wp.get("depends_on") or []),
                 )
             )
 
-        # F03 Execution
+        # F03 Execution (gated by permissions)
+        auto_ok = may_auto_execute(perm) or approve_ai_execution
+        if not auto_ok:
+            progress("REVIEW_ALL: skipping autonomous execution until approved.")
+            state.transition(
+                TaskStatus.PLANNED,
+                "REVIEW_ALL — AI packages await explicit approval",
+            )
+            state.digital_deliverables.append(
+                "Autonomous execution blocked by REVIEW_ALL. Approve AI execution to continue."
+            )
+            self._persist(state)
+            return state
+
         progress("F03 Autonomous Execution — doing AI work…")
         state.transition(TaskStatus.EXECUTING, "Executing AI packages")
         f03 = AutonomousExecution(self.llm)
@@ -379,10 +409,13 @@ class WorkflowEngine:
         )
         state.agent_calls.append(rec)
 
+        ai_packages = [w for w in state.work_packages if w.assignee == "AI"]
         for item in exec_out.get("executed", []):
             title = item.get("title")
+            matched = False
             for wp in state.work_packages:
                 if wp.title == title:
+                    matched = True
                     wp.deliverable_summary = item.get("deliverable_summary")
                     if item.get("status") == "BLOCKED_HUMAN":
                         wp.status = TaskStatus.BLOCKED_HUMAN
@@ -391,6 +424,17 @@ class WorkflowEngine:
                         wp.status = TaskStatus.COMPLETED
                     if wp.deliverable_summary:
                         state.digital_deliverables.append(wp.deliverable_summary)
+            # Live models may paraphrase titles — attach leftover deliverables in order
+            if not matched and ai_packages:
+                wp = ai_packages.pop(0)
+                wp.deliverable_summary = item.get("deliverable_summary")
+                if item.get("status") == "BLOCKED_HUMAN":
+                    wp.status = TaskStatus.BLOCKED_HUMAN
+                    wp.blocker = "Identity verification required"
+                else:
+                    wp.status = TaskStatus.COMPLETED
+                if wp.deliverable_summary:
+                    state.digital_deliverables.append(wp.deliverable_summary)
 
         # Simulated insurer barrier
         progress("Simulated insurer portal check…")
@@ -456,8 +500,13 @@ class WorkflowEngine:
             ics_path = export_ics(slot, ics_dir / f"{slot.slot_id}.ics")
             intervention.suggested_slot = slot
             intervention.ics_path = str(ics_path)
-            intervention.status = "SCHEDULED"
+            intervention.status = "WAITING_RESULT"
             state.calendar_slots.append(slot)
+        else:
+            intervention.status = "PREPARED"
+            state.digital_deliverables.append(
+                "No calendar slot found before/after constraints; brief prepared without ICS."
+            )
 
         state.interventions.append(intervention)
         state.transition(TaskStatus.WAITING_RESULT, "ICS prepared; awaiting user result")

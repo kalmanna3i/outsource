@@ -123,7 +123,7 @@ def export_ics(slot: CalendarSlot, path: Path) -> Path:
         "METHOD:PUBLISH",
         "BEGIN:VEVENT",
         f"UID:{uid}",
-        f"DTSTAMP:{fmt(datetime.utcnow())}Z",
+        f"DTSTAMP:{fmt(datetime.now())}Z",
         f"DTSTART:{fmt(slot.start)}",
         f"DTEND:{fmt(slot.end)}",
         f"SUMMARY:{summary}",
