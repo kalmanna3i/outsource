@@ -15,8 +15,12 @@ ROOT = Path(__file__).resolve().parent.parent
 REPO = "https://github.com/kalmanna3i/outsource"
 
 def main_short_sha() -> str:
+    import os
     import subprocess
 
+    override = os.environ.get("CANVAS_MAIN_SHA", "").strip()
+    if override:
+        return override
     return subprocess.check_output(
         ["git", "rev-parse", "--short=7", "HEAD"],
         cwd=ROOT,
