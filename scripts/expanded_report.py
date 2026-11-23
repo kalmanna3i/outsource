@@ -238,6 +238,7 @@ Input tokens: ______ · Cached input: ______ · Output tokens: ______ · Model: 
 <li><strong>Deterministic engines</strong> — insurer check, scheduler, ICS export, finance projection, safety regex scan run without LLM spend; tradeoff: insurer is simulation only.</li>
 </ul>
 <p>If Maya ran live eight times per evening during exam season (unrealistic), monthly cost would be <em>R</em> × <em>C_run</em> with <em>R</em> ≈ 240; that stress case is why caps exist. Teaching staff grading in demo mode should expect <strong>not measured</strong> in the token column—this is correct behavior, not missing implementation.</p>
+<p><strong>Worked example (illustrative only — not measured):</strong> suppose a live Priority 0 run returned 12,000 input and 2,500 output tokens on <code>gpt-6-luna</code>, and staff recorded provider list prices <em>P_in</em> and <em>P_out</em> in dollars per million tokens. Then <em>C_run</em> = (12000/10⁶)<em>P_in</em> + (2500/10⁶)<em>P_out</em>. With <em>R</em> = 20 workflows/month, one user costs 20·<em>C_run</em>; 100 users cost 2,000·<em>C_run</em>; 10,000 users cost 200,000·<em>C_run</em> before engineering discounts. OUTSOURCE does not substitute guessed prices—leave the placeholder blank until Kay captures one live Agent Activity screenshot.</p>
 
 <h2>6. Safety</h2>
 <h3>Threat model (selected)</h3>
