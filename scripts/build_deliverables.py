@@ -13,19 +13,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 REPO = "https://github.com/kalmanna3i/outsource"
-
-def main_short_sha() -> str:
-    import os
-    import subprocess
-
-    override = os.environ.get("CANVAS_MAIN_SHA", "").strip()
-    if override:
-        return override
-    return subprocess.check_output(
-        ["git", "rev-parse", "--short=7", "HEAD"],
-        cwd=ROOT,
-        text=True,
-    ).strip()
 MEDIA = Path(
     "/Users/kalmannai/Library/Application Support/Cursor/AgentStores/"
     "cursor_agent_stores/bc-07aa36f8-4fc8-464b-9258-096c7fa8bd7d/files/media"
@@ -152,7 +139,6 @@ def build_report() -> str:
     modules = load_module_images()
     return mod.render_expanded_report(
         repo=REPO,
-        main_sha=main_short_sha(),
         arch_svg=ARCH_SVG,
         safety_test=SAFETY_TEST,
         trace=trace,
@@ -177,7 +163,7 @@ def build_slides() -> str:
 
 <section>
 <h1>OUTSOURCE</h1>
-<p>Kay Al Mannai · MGT 409 · main {main_short_sha()}</p>
+<p>Kay Al Mannai · MGT 409 · branch <strong>main</strong></p>
 <p><a href="{REPO}">{REPO}</a></p>
 <p class="fragment">Priority 0 + Strategic Radar + Contextual + Stacking · 55 tests (demo)</p>
 </section>
