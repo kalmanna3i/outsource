@@ -23,6 +23,13 @@ def test_boston_incremental_cost_deterministic() -> None:
     assert cmp.original.total_cost_usd == 1070.0
     assert cmp.alternative.total_cost_usd == 1280.0
     assert cmp.incremental_cost_usd == 210.0
+    assert cmp.original.total_time_minutes == 160
+    assert cmp.alternative.total_time_minutes == 195
+    assert cmp.incremental_time_minutes == 35
+    assert str(cmp.incremental_time_minutes) in cmp.net_benefit_summary
+    assert cmp.incremental_time_minutes == (
+        cmp.alternative.total_time_minutes - cmp.original.total_time_minutes
+    )
 
 
 def test_bundle_sums_lines() -> None:

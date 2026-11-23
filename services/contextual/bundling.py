@@ -57,10 +57,13 @@ def compare_bundles(
         risks=alt_risks,
     )
     d_cost = round(alternative.total_cost_usd - original.total_cost_usd, 2)
-    d_time = alternative.total_time_minutes - original.total_time_minutes
+    orig_min = sum(l.duration_minutes for l in original_lines)
+    alt_min = sum(l.duration_minutes for l in alternative_lines)
+    d_time = alt_min - orig_min
     summary = (
         f"Alternative adds ${d_cost:,.2f} and {d_time} minutes vs original "
-        f"(${original.total_cost_usd:,.2f} → ${alternative.total_cost_usd:,.2f})."
+        f"(${original.total_cost_usd:,.2f} → ${alternative.total_cost_usd:,.2f}; "
+        f"time {orig_min} → {alt_min} min from line items)."
     )
     return BundleComparison(
         context_label=context_label,

@@ -55,7 +55,9 @@ class ContextualEngine:
             f"Context: {ctx.model_dump_json()}",
             demo_payload=scout.demo_ord(),
         )
-        opportunities = self._coerce_list(payload, bp, ctx, fx.ORD_GEO)
+        opportunities = self._coerce_list(
+            payload, bp, ctx, fx.ORD_GEO, scenario_key="ord_layover"
+        )
         progress("Itinerary/Bundling Analyst (C02) narrating layover tradeoffs…")
         analyst = ContextualBundlingAnalyst(self.llm)
         _, call2 = analyst.run(
@@ -80,7 +82,7 @@ class ContextualEngine:
         geo = fx.BOSTON_GEO
         opp = ContextualOpportunity(**{k: v for k, v in template.items() if k != "geo_key"})
         opp = assess_feasibility(ctx, opp, geo)
-        opp = score_alignment(opp, bp)
+        opp = score_alignment(opp, bp, scenario_key="boston_conference")
         opp.discovered_by = ["C01"]
         progress("Bundling: comparing original vs +1 day (deterministic math)…")
         orig_rows, ext_rows = fx.boston_bundle_lines()
@@ -125,6 +127,7 @@ class ContextualEngine:
         bp: LifeBlueprint,
         ctx: TravelContext,
         geo_map: dict[str, Any],
+        scenario_key: str = "ord_layover",
     ) -> list[ContextualOpportunity]:
         raw_list = payload.get("opportunities") or fx.ord_opportunity_templates()
         out: list[ContextualOpportunity] = []
@@ -134,7 +137,7 @@ class ContextualEngine:
             geo = geo_map.get(gk) or fx.ORD_GEO["msi"]
             opp = ContextualOpportunity(**row)
             opp = assess_feasibility(ctx, opp, geo)
-            opp = score_alignment(opp, bp)
+            opp = score_alignment(opp, bp, scenario_key=scenario_key)
             opp.discovered_by = ["C01"]
             out.append(opp)
         return out

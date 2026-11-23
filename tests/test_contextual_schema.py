@@ -37,6 +37,15 @@ def test_no_private_whereabouts_fields() -> None:
     assert forbidden.isdisjoint(ContextualOpportunity.model_fields)
 
 
+def test_ord_layover_alignment_excludes_wedding_and_work_obligation() -> None:
+    run = ContextualEngine().run_layover_scenario()
+    feasible = next(o for o in run.opportunities if o.feasibility_status == "feasible")
+    reason = feasible.mission_alignment_reason.lower()
+    assert "wedding" not in reason
+    assert "work obligation" not in reason
+    assert "insurance" not in reason
+
+
 def test_engine_layover_has_feasible_and_infeasible() -> None:
     run = ContextualEngine().run_layover_scenario()
     statuses = {o.feasibility_status for o in run.opportunities}

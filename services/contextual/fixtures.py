@@ -116,7 +116,12 @@ def boston_bundle_lines() -> tuple[list[dict], list[dict]]:
         {"label": "Round-trip airfare (economy)", "cost_usd": 420.0, "duration_minutes": 0, "notes": "Fixed"},
         {"label": "Conference hotel (3 nights)", "cost_usd": 585.0, "duration_minutes": 0},
         {"label": "Conference registration", "cost_usd": 0.0, "duration_minutes": 0, "notes": "Employer-paid"},
-        {"label": "Evening blocks (travel prep)", "cost_usd": 65.0, "duration_minutes": 180},
+        {
+            "label": "Evening blocks (travel prep)",
+            "cost_usd": 65.0,
+            "duration_minutes": 160,
+            "notes": "Replaced on extension day by public activities in alternative",
+        },
     ]
     extended = [
         {"label": "Round-trip airfare (economy)", "cost_usd": 420.0, "duration_minutes": 0},
