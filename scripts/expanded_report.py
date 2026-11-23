@@ -74,11 +74,15 @@ AGENT_TABLE_ROWS = """
 def render_expanded_report(
     *,
     repo: str,
+    main_sha: str = "858e339",
     arch_svg: str,
     safety_test: str,
     trace: dict[str, Any],
     img: Callable[[str, str], str],
+    img_media: Callable[[str, str], str] | None = None,
 ) -> str:
+    if img_media is None:
+        img_media = lambda _k, _a: ""
     trace_json = html.escape(
         json.dumps(
             {
@@ -123,7 +127,7 @@ table{{width:100%;border-collapse:collapse;font-size:10pt;margin:0.45em 0 0.65em
 th,td{{border:1px solid #D9D2C5;padding:0.28em 0.38em;vertical-align:top}}
 th{{background:#E8EEF0}}
 .shot{{margin:0.5em 0;page-break-inside:avoid}}
-.shot img{{display:block;width:100%;max-height:2.75in;object-fit:contain;border:1px solid #D9D2C5}}
+.shot img{{display:block;width:100%;max-height:2.15in;object-fit:contain;border:1px solid #D9D2C5}}
 .shot figcaption{{font-size:9pt;color:#5C6B7A;margin-top:0.2em}}
 pre{{background:#0B1F33;color:#F7F3EC;padding:0.45em;font-size:8pt;line-height:1.35;overflow:auto;page-break-inside:avoid}}
 .callout{{background:#EAF1F2;border-left:4px solid #3F6F7A;padding:0.45em 0.65em;margin:0.5em 0}}
@@ -139,30 +143,16 @@ li{{margin:0.2em 0}}
 
 <h2>1. Title + links</h2>
 <p><strong>Kay Al Mannai</strong> · Yale School of Management · MGT 409 AI Foundations for Managers · November 23, 2026 (America/New_York).</p>
-<p><strong>Public repo:</strong> <a href="{repo}">{repo}</a></p>
+<p><strong>Public repo:</strong> <a href="{repo}">{repo}</a> · <strong>main</strong> <code>{main_sha}</code> · <strong>55 tests</strong> pass under <code>APP_MODE=demo</code>.</p>
 <p><strong>Application:</strong> run locally — <code>streamlit run app.py</code> (no production hosting in this submission).</p>
-<p>OUTSOURCE is a Personal Strategy &amp; Execution Office: it reads life goals, compares opportunity costs across competing obligations, assigns work to AI versus human, executes draftable work, and—when a barrier requires a person—prepares a private intervention brief, schedules a calendar slot, exports ICS, and resumes only after the user records an outcome.</p>
-<p class="small">This report describes a working prototype built by the author. Screenshots are from a real demo-mode run on the build machine ({trace['mode']} mode).</p>
+<p>OUTSOURCE is a Personal Strategy &amp; Execution Office: Priority 0 compares opportunity costs and prepares human handoffs; extension modules add <strong>Strategic Radar</strong> (mission-aligned discovery), <strong>Contextual Opportunities</strong> (travel-window bundling), and <strong>Opportunity Stacking</strong> (multidimensional life commitments). All extension UI paths in this submission ran in <strong>demo mode</strong> with labeled fixtures unless noted as deterministic code.</p>
+<p class="small">Priority 0 screenshots are from a demo-mode run on the build machine ({trace['mode']} mode). Module screenshots are from labeled SIMULATED_FIXTURE flows on main {main_sha}.</p>
 
 <h2>2. Motivation</h2>
 <h3>Fictional persona (not a real pilot user)</h3>
 <p><strong>Maya Chen</strong> is a <em>fictional</em> second-year MBA executive: she leads a small product team during the day, carries a 4.0 credit load, and is responsible for family logistics. On submission nights she faces four simultaneous pulls: a course final due at 11:59 PM Eastern, a close friend’s wedding with a fixed ceremony window, a stakeholder expecting a work status note, and an insurance claim stuck behind an identity-verification gate. Maya is competent; her bottleneck is not lack of intelligence but <strong>attention fragmentation</strong> and tools that optimize the wrong objective.</p>
 <h3>Today’s manual workflow (typical)</h3>
-<ol>
-<li>Open the academic deliverable checklist in a notes app and mentally rank “MBA final” first without writing down tradeoffs against the wedding.</li>
-<li>Ask a general-purpose chat assistant for a priority list; receive fluent text with no persistent link to her stored goals or calendar conflicts.</li>
-<li>Draft a work email in the same chat thread; risk sending language she has not verified, or lose time merging versions across tabs.</li>
-<li>Open the insurer portal in a browser; hit knowledge-based authentication; stop without a prepared brief or a scheduled block on the calendar.</li>
-<li>Copy partial instructions into a calendar event—sometimes leaking claim identifiers into a description shared with an assistant’s calendar sync.</li>
-<li>After the call, forget to translate the outcome into follow-ups for the MBA and work threads.</li>
-</ol>
-<p>Conservatively, this manual sequence involves <strong>fifteen or more</strong> context switches (apps, tabs, mental replans) before anything is “done.” Maya pays in three currencies: <strong>time</strong> (20–45 minutes of unstructured replanning on a deadline night), <strong>cognitive load</strong> (keeping four parallel state machines in working memory), and <strong>error risk</strong> (false completion—“ChatGPT said it checked the claim”—or privacy mistakes in calendar text). None of those costs appear on a profit-and-loss statement, but they show up as late submission risk, strained relationships, and compliance mistakes when claim identifiers leak into shared calendars.</p>
-<p>OUTSOURCE does not replace Maya’s judgment on the MBA final or the wedding toast. It compresses the <em>preparation surface area</em>: one intake, one ranked plan, one explicit split of AI draft work versus human-only gates, and one resume step that records what the insurer actually said.</p>
-<h3>Why a manager should care</h3>
-<p>Knowledge workers do not need another drafting chatbot. They need a system that encodes <em>which outcomes are non-negotiable</em>, computes what each hour buys in goal terms, executes only what automation can honestly complete, and surfaces a single prepared human moment when the world requires ID, presence, or signature. OUTSOURCE is scoped to that pattern for Maya’s archetype; the builder (Kay) dogfoods the same submission-night scenario in the mandatory demo.</p>
-<h3>Design constraints implied by Maya’s evening</h3>
-<p>First, the academic final has a sharp external deadline—missing it is not negotiable, but parts of the work (outline, checklist, slide structure) can be drafted by AI while submission remains human. Second, the wedding is a fixed window: the system must treat it as an immovable busy block when searching for insurance-call slots. Third, the work obligation is urgent but not legally identity-gated—appropriate for draft generation plus human send approval. Fourth, the insurer path is explicitly a human-authentication wall in the demo fixture, standing in for portals that will not release PHI to an API. Any credible “chief of staff” software for Maya must represent those four obligation classes differently, not collapse them into a single prioritized to-do list.</p>
-<p>From a managerial lens, the lesson generalizes beyond students: organizations routinely ask leaders to reason about opportunity cost without giving them software that records assumptions, tradeoffs, and who (human vs machine) should act. OUTSOURCE is a course-sized prototype of that recordkeeping discipline.</p>
+<p>Maya scatters the evening across a notes app, a general chat tab, email drafts, and an insurer portal—often <strong>fifteen or more</strong> context switches—with no persisted tradeoffs, no calendar brief separation, and frequent false completion (“the bot checked the claim”). OUTSOURCE compresses preparation into one intake, one ranked plan, AI-only drafts where honest, and one resumable human gate for identity verification.</p>
 
 <h2>3. What is new here</h2>
 <p>Competition is real. Lindy, Motion, Reclaim, Duckbill, and OpenAI’s agent experiences all help individuals offload work. OUTSOURCE does not claim a green-field market; it occupies a narrower wedge: <strong>goal-weighted opportunity cost</strong>, <strong>explicit AI/HUMAN allocation</strong>, and a <strong>handoff contract</strong> that stops at identity walls instead of faking success. The table below lists only features this repository actually implements (verifiable in code/UI) versus publicly known positioning of named products—without asserting their internal architectures.</p>
@@ -174,11 +164,7 @@ li{{margin:0.2em 0}}
 <tr><td><strong>Duckbill</strong></td><td>Human+AI concierge completing errands</td><td>No human concierge staff; simulated insurer only</td><td>Transparent local audit trail (Agent Activity, state transitions) for coursework</td></tr>
 <tr><td><strong>ChatGPT agents</strong></td><td>General tool-using agents</td><td>Bounded specialist prompts + JSON handoffs + REVIEW_ALL permission gate</td><td>Insurer path labeled SIMULATED_FIXTURE; WAITING_RESULT until user_result</td></tr>
 </table>
-<p>The novelty for grading purposes is not “no competitors exist” but <strong>honest orchestration</strong>: separate public ICS text from private intervention fields, resume F06 only after user-supplied evidence, and default to demo fixtures that never masquerade as live model telemetry.</p>
-<p><strong>Lindy</strong> and similar “AI employee” products optimize for recurring business workflows (inbox, CRM, SDR tasks). OUTSOURCE deliberately does not integrate with corporate SaaS in this MVP; instead it stores a personal Life Blueprint locally so opportunity-cost comparisons reference <em>your</em> stated goals rather than a template industry vertical.</p>
-<p><strong>Motion</strong> and <strong>Reclaim</strong> are strong at calendar mechanics. OUTSOURCE’s scheduler is intentionally narrow—business hours, buffers, overlap detection—because the grading scenario is legibility and testability, not ML-optimized scheduling. The teaching point is scheduling in service of a <em>human intervention</em> that follows a strategy conversation, not scheduling for its own sake.</p>
-<p><strong>Duckbill</strong> sells outcome completion with humans behind the scenes. OUTSOURCE inverts the transparency model for education: every agent step is logged with mode=<code>demo</code> or <code>live</code>, and simulated insurer results are typed <code>SIMULATED_FIXTURE</code> in the evidence ledger.</p>
-<p><strong>ChatGPT agents</strong> (OpenAI’s agent modes and custom GPTs) can call tools broadly. Without hard constraints, they may summarize insurer status inaccurately. F03’s system prompt forbids claiming sends/calls; the workflow adds a Python gate that always routes insurer status through the fixture or a future real integration, never through unconstrained prose.</p>
+<p>The novelty for grading is <strong>honest orchestration</strong>: public ICS text stays separate from private briefs; F06 resumes only after user-supplied evidence; simulated discovery and stacking matrices stay labeled; one Yale SOM campus address is stored as <code>VERIFIED_SOURCE</code> while hypothetical introduction edges on the network graph are dashed and never shown as real relationships.</p>
 
 <div class="pagebreak"></div>
 <h2>4. The agents</h2>
@@ -191,12 +177,17 @@ li{{margin:0.2em 0}}
 {AGENT_TABLE_ROWS}
 </table>
 <h3>Handoff contract</h3>
-<p>Each specialist returns a single JSON object via <code>LLMClient.complete</code>. The orchestrator (<code>WorkflowEngine</code>) performs three mechanical steps: (1) append an <code>AgentCallRecord</code> to <code>WorkflowState.agent_calls</code>; (2) map JSON fields into Pydantic models (<code>DecisionPlan</code>, <code>WorkPackage</code>, <code>HumanIntervention</code>); (3) pass serialized prior objects as plain text inside the next agent’s user message. Demo mode injects fixtures tagged <code>_demo_labeled</code>; live mode uses OpenAI-compatible chat completions with <code>response_format: json_object</code>. The insurer step is not an LLM call—it is a Python function returning <code>SIMULATED_FIXTURE</code> evidence.</p>
-<p><strong>Downstream coupling example:</strong> B01’s <code>recommended_sequence</code> list is not merely displayed; F02’s prompt includes that list verbatim, and the UI’s My Decisions page renders the structured <code>OpportunityCostItem</code> rows rather than re-parsing free text. If a live model returned malformed JSON, the workflow would fail fast with an agent error recorded in Agent Activity—there is no silent fallback to fake success.</p>
-<p><strong>Permission insertion point:</strong> between F02 and F03, <code>normalize_permission</code> and <code>may_auto_execute</code> decide whether F03 runs at all. That is a different handoff from “model didn't feel like executing”; it is an explicit organizational control matching the MANAGED_AUTONOMY / REVIEW_ALL modes in the spec.</p>
+<p>Each specialist returns JSON via <code>LLMClient.complete</code>; <code>WorkflowEngine</code> maps fields into Pydantic models and logs <code>AgentCallRecord</code> rows. Demo fixtures are <code>_demo_labeled</code>; live mode uses <code>response_format: json_object</code>. F03 is gated by REVIEW_ALL permissions; the insurer step is Python <code>SIMULATED_FIXTURE</code>, not an LLM claim.</p>
+<h3>Extension modules (demo mode in submission)</h3>
+<table>
+<tr><th>Module</th><th>Agents</th><th>Simulated / illustrative</th><th>Operational (deterministic or gated)</th><th>Planned</th></tr>
+<tr><td>Strategic Radar</td><td>R01–R08 + A01-style execution hooks</td><td>Discovery feed, graph nodes beyond one verified address</td><td>Mission audit rules; research-to-action (outreach draft <em>not sent</em>, ICS, brief, follow-up)</td><td>Background monitoring scheduler</td></tr>
+<tr><td>Contextual Opportunities</td><td>C01–C02</td><td>ORD/Boston scenario fixtures</td><td>Layover feasibility math; Boston bundle +$210 / +35 min vs original itinerary</td><td>Live travel APIs</td></tr>
+<tr><td>Opportunity Stacking</td><td>L01–L06 Life Dimension strategists</td><td>Comparison matrix rows (not researched orgs)</td><td>Hours math: 18 vs 6 hrs/mo → 144 hrs/yr <em>only if comparable benefits</em>; anti–double-count scoring</td><td>Live nonprofit research</td></tr>
+</table>
+<p>These modules were <strong>not</strong> included in the measured live token run in Section 5; they were tested in <code>APP_MODE=demo</code> with fixtures.</p>
 <h3>Model choice: why <code>gpt-6-luna</code> on the course key</h3>
-<p>Yale MGT 409 project requirements restrict the course Portkey key to <strong>gpt-6-luna</strong> only. OUTSOURCE defaults <code>OPENAI_MODEL</code> to that slug when <code>PORTKEY_API_KEY</code> is set without a personal OpenAI key. Eight short JSON completions per Priority 0 run favor a capable instruction-following model while remaining inside course budget rules. Personal <code>OPENAI_API_KEY</code> runs may set any model via <code>OPENAI_MODEL</code>. Demo submissions use zero model spend.</p>
-<p>Structured outputs reduce parse failures: each specialist prompt enumerates required JSON keys, and the orchestrator assumes dict shapes when building Pydantic objects. That design trades a few extra output tokens for fewer orchestration bugs—important when teaching staff run the app once under time pressure.</p>
+<p>Yale MGT 409 restricts the course Portkey key to <strong>gpt-6-luna</strong>. Eight JSON completions cover Priority 0; demo mode spends $0 for grading and module screenshots.</p>
 <h3>Step-by-step trace of the captured demo run</h3>
 <p>Workflow <code>{trace['workflow_id']}</code> · final status <code>{trace['final_status']}</code> · agent calls before resume: 7 · after F06: 8.</p>
 <ol>
@@ -209,12 +200,6 @@ li{{margin:0.2em 0}}
 <li><strong>WAITING_RESULT:</strong> UI blocks COMPLETED until user text.</li>
 <li><strong>F06:</strong> three follow-ups after resume.</li>
 </ol>
-<h3>State transitions (from SQLite workflow persistence)</h3>
-<pre>{transitions_esc}</pre>
-<h3>Agent call ledger (excerpt)</h3>
-<pre>{calls_esc}</pre>
-<h3>Work packages (first three JSON records)</h3>
-<pre>{wp_esc}</pre>
 <h3>Human intervention object (truncated)</h3>
 <pre>{hi_esc}</pre>
 {img("daily_briefing_start","Figure 1 — Daily Briefing before Priority 0 run")}
@@ -242,6 +227,7 @@ li{{margin:0.2em 0}}
 <tr><td><strong>Total (8 live calls)</strong></td><td><strong>4,283</strong></td><td><strong>0</strong></td><td><strong>5,387</strong></td><td><strong>$0.003122</strong></td></tr>
 </table>
 <p>Wall time: <strong>49.1 s</strong> end to end. That is 42.9 s for the seven calls up to the human barrier (A01&ndash;F04) and 6.2 s for F06 after the verification result was entered. It excludes the human&#39;s own time on the insurer call.</p>
+<p class="callout"><strong>No new live measurements</strong> were taken for Strategic Radar, Contextual Opportunities, or Opportunity Stacking. Those modules appear in the UI and tests in <code>demo</code> mode only; token and cost figures in this section remain Priority 0 only.</p>
 {live_figure()}
 <h3>Definitions</h3>
 <ul>
@@ -258,16 +244,15 @@ li{{margin:0.2em 0}}
 <tr><td>10,000 users / month</td><td>10,000 &times; R &times; C_run</td><td>$0</td><td><strong>$624.36</strong> before batching, output caps or caching</td></tr>
 </table>
 <h3>What drives the cost</h3>
-<p>Output tokens are 86% of the bill ($0.002694 of $0.003122), even though output is only 56% of all tokens, because gpt-6-luna output costs 5&times; input. Cached input was 0: each agent sends a different, short prompt (the largest is about 1,000 tokens), so there is no long shared prefix for the provider to cache. At this scale the useful lever is capping output length and tightening the JSON each agent returns, not caching. A02 and B01 together are 41% of cost. Two aborted attempts before the measured run made three extra billed calls, not included above: the model rejected <code>temperature=0.2</code>, and B01 answered a numeric field in prose. Both bugs were fixed in code before the run.</p>
+<p>Output tokens are <strong>86%</strong> of the bill because gpt-6-luna output is priced 5&times; input; cached input was <strong>0</strong> on this run. A02 and B01 are the largest share. Extension modules did not add live spend.</p>
 <h3>Cost controls and tradeoffs</h3>
 <ul>
 <li><code>MAX_AGENT_CALLS</code> (default 25) &mdash; hard stop before another completion; prevents runaway loops; may truncate unfinished workflows if set too low (tested at 3).</li>
 <li><code>MAX_WORKFLOW_COST_USD</code> (default 2.00) &mdash; accumulates live spend from usage &times; the price table; the measured run used $0.0031, about 0.16% of the cap.</li>
 <li><code>APP_MODE=demo</code> &mdash; zero spend for grading and screenshots; tradeoff: demo runs show no token counts, which is why the figures above come from a separate live pass.</li>
 <li><code>REVIEW_ALL</code> permission &mdash; blocks F03 until checkbox approval; saves tokens but requires extra UI click (operational in tests).</li>
-<li><strong>Deterministic engines</strong> &mdash; insurer check, scheduler, ICS export, finance projection, safety regex scan run without LLM spend; tradeoff: insurer is simulation only.</li>
+<li><strong>Deterministic engines</strong> &mdash; insurer check, scheduler, ICS export, finance projection, radar/contextual/stacking math, safety regex scan&mdash;run without LLM spend in their operational paths.</li>
 </ul>
-<p>Stress case: if Maya ran live eight times per evening during exam season (R &asymp; 240), she would cost about $0.75 per month. Even at 10,000 such users that is about $7,492 per month, so the caps exist to stop loops, not to make the base case affordable. Teaching staff grading in demo mode will see $0 and no token counts&mdash;this is correct behavior, not missing implementation.</p>
 
 <h2>6. Safety</h2>
 <h3>Threat model (selected)</h3>
@@ -281,10 +266,6 @@ li{{margin:0.2em 0}}
 <tr><td>Privacy leak via calendar</td><td>claim ID in ICS DESCRIPTION</td><td>public_description only; tests assert no Photo ID in ICS</td><td><code>tests/test_intervention_fields.py</code></td></tr>
 </table>
 {img("safety","Figure 8 — Settings: permission mode selector and safety scan UI")}
-<h3>Operational notes on each defense</h3>
-<p><strong>Injection quarantine</strong> is heuristic, not cryptographic: it pattern-matches instruction-override phrases and wraps the payload so downstream prompts treat content as data. Staff can verify by pasting attack strings into Daily Briefing or the Settings scanner.</p>
-<p><strong>REVIEW_ALL</strong> is enforced in code before F03, not merely described in documentation: a run without the Daily Briefing approval checkbox stops at PLANNED with a visible digital deliverable explaining the block (see permissions tests).</p>
-<p><strong>Spend caps</strong> increment only when live usage objects return token counts with a known price row; demo mode never increments cost, preventing accidental fabrication of “cheap” metrics.</p>
 <h3>Pytest output (safety + permissions)</h3>
 <pre>{safety_esc}</pre>
 
@@ -300,32 +281,40 @@ li{{margin:0.2em 0}}
 <tr><td>Calendar artifact</td><td>Ad hoc event text</td><td>ICS file + private brief separation</td></tr>
 <tr><td>Follow-ups</td><td>Memory-dependent</td><td>3 explicit strings from F06 after resume</td></tr>
 </table>
-<h3>Scheduler evidence from the same run</h3>
-<p>The workflow seeds a <strong>fixed wedding busy block</strong> (16:00–20:00 local naive time). The intervention slot was placed <strong>09:45–10:15</strong>, respecting business hours and avoiding overlap with the wedding block—the deterministic engine’s purpose. Unit tests additionally cover overlap detection and impossible deadlines (<code>tests/test_scheduler.py</code>).</p>
-<p>For course grading, the meaningful comparison is <strong>structural</strong>: manual workflows scatter state across tabs; OUTSOURCE persists a single <code>WorkflowState</code> with enumerated transitions, six packages, and an intervention object that must receive <code>user_result</code> before <code>COMPLETED</code>. That persistence is what teaching staff can replay in demo mode without inventing a pilot narrative.</p>
-<p class="warn">Hours-saved or revenue figures are <em>not</em> claimed. A one-user timed study would be required to quote minutes saved credibly.</p>
+<h3>Extension modules (screenshots, honest labels)</h3>
+<p><strong>Strategic Radar:</strong> the discovery feed and most graph nodes are <strong>Simulated</strong> illustrative fixtures. One <strong>VERIFIED_SOURCE</strong> edge records the Yale School of Management street address from the public About page; hypothetical warm-introduction paths render as dashed <em>HYPOTHETICAL</em> edges and are not shown as real relationships. Research-to-action can draft outreach (never sent), calendar ICS, a private brief, and follow-ups&mdash;<strong>Operational</strong> in demo with authorization gates. Background monitoring preferences save to SQLite but no scheduler runs (<strong>Planned</strong>).</p>
+{img_media("radar_feed", "Figure 10 — Strategic Radar: illustrative discovery feed (SIMULATED_FIXTURE)")}
+{img_media("radar_network_graph", "Figure 11 — Network graph: one verified Yale SOM address; dashed hypothetical introduction paths")}
+<p><strong>Contextual Opportunities:</strong> ORD layover feasibility rejects distant suburban tours and accepts a downtown MSI-style visit using buffer math in Python (<strong>Operational</strong>). The Boston conference scenario compares a 3-night baseline to a +1-day bundle; incremental cost <strong>$210</strong> and incremental time <strong>35 minutes</strong> are summed in <code>compare_bundles</code>, not asserted by the LLM. Scenario text is <strong>Simulated</strong>.</p>
+{img_media("contextual_ord_layover", "Figure 12 — Contextual: ORD layover feasibility UI")}
+{img_media("contextual_boston_bundle", "Figure 13 — Contextual: Boston bundle comparison (+$210, +35 min)")}
+<p><strong>Opportunity Stacking:</strong> the comparison matrix uses illustrative rows only (not researched organizations). Deterministic code scores strong/moderate/limited contributions without double-counting overlapping benefits and downgrades board-seat career hype. Bundling 18 separate hours/month into one 6-hour commitment recovers <strong>144 hours/year</strong> (twelve months &times; twelve saved hours) <em>only if comparable benefits</em>&mdash;stated in UI. Life Dimension agents L01&ndash;L06 ran in <strong>demo</strong> fixtures for this submission.</p>
+{img_media("stacking_matrix", "Figure 14 — Opportunity Stacking: illustrative comparison matrix")}
+<p class="warn">Priority 0 hours-saved or revenue figures are still <em>not</em> claimed. Extension screenshots document structure and honesty labels, not pilot outcomes.</p>
 
 <h2>8. Limits + next steps</h2>
 <h3>Operational / Simulated / Planned</h3>
 <table>
 <tr><th>Component</th><th>Label</th></tr>
 <tr><td>Priority 0 demo E2E, Blueprint CRUD, Decisions/Work/Attention/Calendar UI</td><td><strong>Operational</strong></td></tr>
-<tr><td>Parent-folder <code>.env</code>, Portkey gpt-6-luna default</td><td><strong>Operational</strong></td></tr>
-<tr><td>Live eight-call path with measured tokens</td><td><strong>Operational</strong> (one live run, Nov 23; see Section 5)</td></tr>
-<tr><td>Insurer portal, CRM email</td><td><strong>Simulated</strong></td></tr>
-<tr><td>Finance projection module</td><td><strong>Simulated</strong> (deterministic; tax/retirement omitted)</td></tr>
-<tr><td>Network, Career nav, CUSTOM_AUTONOMY allowlist</td><td><strong>Planned</strong></td></tr>
+<tr><td>Live eight-call path with measured tokens (Priority 0 only)</td><td><strong>Operational</strong> (Nov 23; Section 5)</td></tr>
+<tr><td>Strategic Radar discovery feed &amp; illustrative graph</td><td><strong>Simulated</strong></td></tr>
+<tr><td>Strategic Radar research-to-action (draft not sent, ICS, brief)</td><td><strong>Operational</strong></td></tr>
+<tr><td>Strategic Radar background monitoring</td><td><strong>Planned</strong></td></tr>
+<tr><td>Contextual layover feasibility &amp; Boston bundling math</td><td><strong>Operational</strong></td></tr>
+<tr><td>Contextual scenario narratives</td><td><strong>Simulated</strong></td></tr>
+<tr><td>Opportunity Stacking matrix &amp; L01&ndash;L06 in submission</td><td><strong>Simulated</strong> (demo fixtures)</td></tr>
+<tr><td>Opportunity Stacking hours / scoring engine</td><td><strong>Operational</strong></td></tr>
+<tr><td>Insurer portal, People CRM email</td><td><strong>Simulated</strong></td></tr>
+<tr><td>Finance projection</td><td><strong>Simulated</strong> (deterministic)</td></tr>
+<tr><td>My Career module, CUSTOM_AUTONOMY allowlist</td><td><strong>Planned</strong></td></tr>
 </table>
 <h3>What teaching staff should expect when grading</h3>
-<p>Clone the public repository, optionally place a course <code>.env</code> one directory above the project folder, run <code>streamlit run app.py</code>, and execute the Priority 0 path in demo mode without spending tokens. Agent Activity should list eight calls after resume, each marked demo with UNKNOWN cost. If staff insert a real Portkey key and set <code>APP_MODE=live</code>, the same UI path should issue eight completions against <code>gpt-6-luna</code>; token fields populate only when the provider returns usage metadata. Staff should not expect email send buttons, live insurer APIs, or Network/Career modules—their absence is documented here rather than hidden.</p>
+<p>Clone the public repository at <code>{main_sha}</code>, run <code>APP_MODE=demo streamlit run app.py</code>, and walk Priority 0 plus sidebar entries Strategic Radar, Contextual Opportunities, and Opportunity Stacking. Agent Activity after Priority 0 shows eight demo calls with UNKNOWN cost. Live tokens were measured once for Priority 0 only (Section 5). Staff should not expect sent email, live insurer APIs, or a running radar scheduler.</p>
 <h3>One-month roadmap (if continued)</h3>
 <ol>
-<li>Week 1: cap per-agent output length and rerun live to compare cost against the Section 5 baseline.</li>
-<li>Week 2: Google Calendar OAuth read-only for real busy blocks.</li>
-<li>Week 3: email draft→approve→send behind MANAGED_AUTONOMY only.</li>
-<li>Week 4: three fictional-to-real pilot sessions with timed before/after protocol (still no invented quotes in reports).</li>
+<li>Cap per-agent output and re-measure Priority 0 live cost.</li>
+<li>Calendar OAuth read-only; radar background jobs; nonprofit research with public sources only.</li>
 </ol>
-<p class="small">Demo trace summary (full state in repo SQLite when staff run the app):</p>
-<pre>{trace_json}</pre>
 <p class="small">Public repo · {repo}</p>
 </body></html>"""

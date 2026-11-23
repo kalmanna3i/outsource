@@ -4,15 +4,31 @@
 from __future__ import annotations
 
 import base64
+import html
 import json
+import re
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "deliverables" / "screenshots" / "manifest.b64.json"
 REPO = "https://github.com/kalmanna3i/outsource"
-
-import sys
+MAIN_SHA = "858e339"
+MEDIA = Path(
+    "/Users/kalmannai/Library/Application Support/Cursor/AgentStores/"
+    "cursor_agent_stores/bc-07aa36f8-4fc8-464b-9258-096c7fa8bd7d/files/media"
+)
+MANIFEST = ROOT / "deliverables" / "screenshots" / "manifest.b64.json"
+PRIORITY_KEY_FRAGMENTS = [
+    ("daily_briefing_start", "Figure 1"),
+    ("daily_briefing_after", "Figure 2"),
+    ("decisions", "Figure 3"),
+    ("work", "Figure 4"),
+    ("intervention", "Figure 5"),
+    ("resume", "Figure 6"),
+    ("agent_activity", "Figure 7"),
+    ("safety", "Figure 8"),
+]
 
 SAFETY_TEST = subprocess.run(
     [sys.executable, "-m", "pytest", "tests/test_safety.py", "tests/test_permissions_budget.py", "-q"],
@@ -48,20 +64,68 @@ ARCH_SVG = """<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 820 420' role
 <line x1='680' y1='250' x2='420' y2='300' stroke='#3F6F7A' stroke-width='2'/>
 </svg>"""
 
-IMG = json.loads(MANIFEST.read_text(encoding="utf-8"))
+MODULE_FILES = {
+    "radar_feed": "radar-feed.png",
+    "radar_network_graph": "radar-network-graph.png",
+    "contextual_ord_layover": "contextual-ord-layover.png",
+    "contextual_boston_bundle": "contextual-boston-bundle.png",
+    "stacking_matrix": "stacking-matrix.png",
+}
+
+
+def _extract_priority_manifest_from_report() -> dict[str, str]:
+    report_path = ROOT / "deliverables" / "report.html"
+    if not report_path.exists():
+        return {}
+    text = report_path.read_text(encoding="utf-8")
+    pat = re.compile(
+        r'<img[^>]+src="data:image/png;base64,([^"]+)"[^>]*>\s*<figcaption>([^<]+)</figcaption>',
+        re.I,
+    )
+    found: dict[str, str] = {}
+    for m in pat.finditer(text):
+        b64, cap = m.group(1), m.group(2)
+        for key, frag in PRIORITY_KEY_FRAGMENTS:
+            if frag in cap and key not in found:
+                found[key] = b64
+                break
+    return found
+
+
+def load_priority_images() -> dict[str, str]:
+    if MANIFEST.exists():
+        return json.loads(MANIFEST.read_text(encoding="utf-8"))
+    extracted = _extract_priority_manifest_from_report()
+    if extracted:
+        MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+        MANIFEST.write_text(json.dumps(extracted), encoding="utf-8")
+    return extracted
+
+
+def load_module_images() -> dict[str, str]:
+    out: dict[str, str] = {}
+    for key, fname in MODULE_FILES.items():
+        path = MEDIA / fname
+        if not path.exists():
+            raise FileNotFoundError(f"Missing module screenshot: {path}")
+        out[key] = base64.b64encode(path.read_bytes()).decode()
+    return out
+
+
 LIVE_B64 = base64.b64encode((ROOT / "deliverables" / "live_agent_activity.png").read_bytes()).decode()
 
 
-def img_tag(key: str, alt: str, max_width: str = "100%") -> str:
+def img_tag(img: dict[str, str], key: str, alt: str, max_width: str = "100%") -> str:
+    if key not in img:
+        return f'<p class="warn">Missing screenshot key: {html.escape(key)}</p>'
     return (
         f'<figure class="shot"><img alt="{alt}" style="max-width:{max_width};border:1px solid #D9D2C5" '
-        f'src="data:image/png;base64,{IMG[key]}" /><figcaption>{alt}</figcaption></figure>'
+        f'src="data:image/png;base64,{img[key]}" /><figcaption>{alt}</figcaption></figure>'
     )
 
 
 def build_report() -> str:
     import importlib.util
-    import sys
 
     if str(ROOT) not in sys.path:
         sys.path.insert(0, str(ROOT))
@@ -72,27 +136,21 @@ def build_report() -> str:
     assert spec.loader
     spec.loader.exec_module(mod)
     trace = mod.capture_demo_trace()
+    priority = load_priority_images()
+    modules = load_module_images()
     return mod.render_expanded_report(
         repo=REPO,
+        main_sha=MAIN_SHA,
         arch_svg=ARCH_SVG,
         safety_test=SAFETY_TEST,
         trace=trace,
-        img=lambda k, alt: img_tag(k, alt),
+        img=lambda k, alt: img_tag(priority, k, alt),
+        img_media=lambda k, alt: img_tag(modules, k, alt),
     )
 
 
 def build_slides() -> str:
-    keys = [
-        ("daily_briefing_after", "Demo: after Priority 0 run"),
-        ("decisions", "Opportunity-cost decisions"),
-        ("intervention", "Human brief + ICS"),
-        ("agent_activity", "Agent Activity (demo)"),
-        ("safety", "Safety + permissions"),
-    ]
-    imgs = "\n".join(
-        f'<img alt="{alt}" style="max-height:320px;width:auto;border:1px solid #3F6F7A" src="data:image/png;base64,{IMG[k]}"/>'
-        for k, alt in keys
-    )
+    modules = load_module_images()
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"/><title>OUTSOURCE Slides</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css"/>
@@ -100,35 +158,37 @@ def build_slides() -> str:
 <style>
 .reveal h1,.reveal h2{{font-family:Georgia,serif;color:#F7F3EC}}
 .reveal section{{background:linear-gradient(160deg,#0B1F33,#10263A 55%,#3F6F7A);}}
-.reveal p,li{{color:#E7EEF2;font-size:.88em}}
+.reveal p,li{{color:#E7EEF2;font-size:.82em}}
 .reveal a{{color:#9FCBD3}}
 </style></head><body>
 <div class="reveal"><div class="slides">
 
 <section>
 <h1>OUTSOURCE</h1>
-<p>Kay Al Mannai · MGT 409</p>
+<p>Kay Al Mannai · MGT 409 · main {MAIN_SHA}</p>
 <p><a href="{REPO}">{REPO}</a></p>
-<p class="fragment">Know what matters. Do what only you can. Delegate the rest.</p>
+<p class="fragment">Priority 0 + Strategic Radar + Contextual + Stacking · 55 tests (demo)</p>
 </section>
 
-<section><h2>Problem</h2><p>One evening: MBA deadline · wedding · work · insurance identity wall.</p></section>
+<section><h2>Problem</h2><p>One evening: MBA deadline · wedding · work · insurance identity wall — goal-aware opportunity cost, not generic automation.</p></section>
 
-<section><h2>What’s new vs Lindy, Motion, Reclaim, Duckbill, ChatGPT agents</h2><p>Goal-aware opportunity cost + honest human handoff (brief/ICS/resume), not generic automation.</p></section>
+<section><h2>Priority 0 agents</h2>{ARCH_SVG}<p>8 specialist live calls (measured) or labeled demo fixtures.</p></section>
 
-<section><h2>Agents</h2>{ARCH_SVG}<p>8 specialist calls (live) or labeled fixtures (demo).</p></section>
+<section><h2>Cost (measured, live only)</h2><p style="font-size:.58em">One Priority 0 live run, Nov 23 · 5:37 PM ET · gpt-6-luna (OpenAI direct; course Portkey 401) · 8 calls · 4,283 input / 0 cached / 5,387 output · <strong>$0.00312</strong> · 49.1 s. Radar / Contextual / Stacking: <strong>demo only</strong> (no new token counts).</p><img alt="Agent Activity after live run" style="max-height:220px;width:auto;border:1px solid #3F6F7A" src="data:image/png;base64,{LIVE_B64}"/></section>
 
-<section><h2>Demo screenshots</h2>{imgs}</section>
+<section><h2>Strategic Radar</h2><ul><li>Discovery feed: <strong>Simulated</strong> illustrative fixtures</li><li>Research-to-action (draft not sent, ICS, follow-up): <strong>Operational</strong></li><li>Background monitoring: <strong>Planned</strong></li><li>One <strong>VERIFIED</strong> Yale SOM address; dashed edges = hypothetical introductions (not real relationships)</li></ul><img alt="Radar feed" style="max-height:200px;border:1px solid #3F6F7A" src="data:image/png;base64,{modules['radar_feed']}"/></section>
 
-<section><h2>Cost (measured, live)</h2><p style="font-size:.62em">One live run, Nov 23 · gpt-6-luna via OpenAI directly (personal key; course Portkey key returned 401) · 8 agent calls · 4,283 input / 0 cached / 5,387 output tokens · <strong>$0.00312</strong> per run · 49.1 s</p><p style="font-size:.62em">20 runs per user per month: $0.0624 per user · $6.24 for 100 users · $624.36 for 10,000 users. Output is 86% of cost.</p><img alt="Agent Activity after the live run" style="max-height:250px;width:auto;border:1px solid #3F6F7A" src="data:image/png;base64,{LIVE_B64}"/></section>
+<section><h2>Contextual Opportunities</h2><ul><li>ORD layover feasibility: <strong>Operational</strong> (deterministic)</li><li>Boston bundle: +$210 and +35 minutes for extended trip (computed in code)</li><li>Scenarios: <strong>Simulated</strong> SIMULATED_FIXTURE</li></ul>
+<img alt="ORD layover" style="max-height:150px;margin:4px;border:1px solid #3F6F7A" src="data:image/png;base64,{modules['contextual_ord_layover']}"/>
+<img alt="Boston bundle" style="max-height:150px;margin:4px;border:1px solid #3F6F7A" src="data:image/png;base64,{modules['contextual_boston_bundle']}"/></section>
 
-<section><h2>Safety</h2><p>Injection quarantine · REVIEW_ALL gate · no fake insurer calls</p></section>
+<section><h2>Opportunity Stacking</h2><ul><li>Comparison matrix: <strong>Simulated</strong> / Illustrative rows</li><li>18 vs 6 hrs/mo bundled → 144 hrs/yr recovered <em>only if benefits are comparable</em></li><li>L01–L06 strategists: demo fixtures in submission</li></ul><img alt="Stacking matrix" style="max-height:220px;border:1px solid #3F6F7A" src="data:image/png;base64,{modules['stacking_matrix']}"/></section>
 
-<section><h2>Impact (honest)</h2><p>Verified E2E locally; no pilot users.</p></section>
+<section><h2>Safety</h2><p>Injection quarantine · REVIEW_ALL gate · no fake insurer calls · hypothetical graph edges labeled</p></section>
 
-<section><h2>Limits &amp; next</h2><p>Public repo on GitHub · cap output length to cut live cost · pilot users</p></section>
+<section><h2>Limits</h2><p>No pilot users · live tokens measured once (Priority 0) · insurer CRM Network Career planned · public repo</p></section>
 
-<section><h2>Run it</h2><p><code>streamlit run app.py</code></p><p><a href="{REPO}">{REPO}</a></p></section>
+<section><h2>Run it</h2><p><code>streamlit run app.py</code> · <code>APP_MODE=demo</code></p><p><a href="{REPO}">{REPO}</a></p></section>
 
 </div></div>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
@@ -137,8 +197,6 @@ def build_slides() -> str:
 
 
 def word_count(html: str) -> int:
-    import re
-
     text = re.sub(r"<script[^>]*>.*?</script>", " ", html, flags=re.S | re.I)
     text = re.sub(r"<style[^>]*>.*?</style>", " ", text, flags=re.S | re.I)
     text = re.sub(r"<[^>]+>", " ", text)
@@ -174,10 +232,11 @@ if __name__ == "__main__":
     report_html = build_report()
     report_path = ROOT / "deliverables" / "report.html"
     report_path.write_text(report_html, encoding="utf-8")
-    (ROOT / "deliverables" / "slides.html").write_text(build_slides(), encoding="utf-8")
+    slides_html = build_slides()
+    (ROOT / "deliverables" / "slides.html").write_text(slides_html, encoding="utf-8")
     wc = word_count(report_html)
     pages = pdf_page_count(report_path)
-    slide_count = build_slides().count("<section>")
+    slide_count = slides_html.count("<section>")
     print("wrote report + slides")
     print("word_count=", wc)
     print("pdf_pages=", pages)
