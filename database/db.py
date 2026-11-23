@@ -28,6 +28,11 @@ CREATE TABLE IF NOT EXISTS settings_kv (
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS radar_opportunities (
+    dedup_key TEXT PRIMARY KEY,
+    data_json TEXT NOT NULL,
+    first_seen TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS agent_activity (
     call_id TEXT PRIMARY KEY,
     workflow_id TEXT,
@@ -94,6 +99,20 @@ def default_blueprint() -> LifeBlueprint:
         lifestyle="Protect sleep and focus blocks around hard deadlines.",
         health="No sensitive medical inferences; user-managed only.",
         legacy="Build tools that help managers reclaim judgment time.",
+        mission="Build an intentional life: lead an AI-enabled operating business, keep learning, and stay present for the people who matter.",
+        guiding_principles=[
+            "Protect focus blocks around hard deadlines",
+            "Avoid impulsive large financial commitments without analysis",
+            "Substance over prestige",
+            "Show up for important personal milestones",
+        ],
+        strategic_objectives=[
+            "business ownership: own and operate an AI-enabled business within 5 years",
+            "intellectual development: contribute to research on AI and managerial judgment",
+            "career advancement: build a network of operators and executives",
+            "reputation & contribution: share practitioner insight publicly",
+            "meaningful relationships: stay close to friends and family",
+        ],
         goals=[
             Goal(
                 title="Submit MGT 409 final (app + report + slides)",
@@ -148,6 +167,7 @@ def default_people() -> list[PersonProfile]:
             name="Sam Patel",
             relationship="MBA classmate",
             notes="Peer review swap possible for slides.",
+            milestones=["MBA capstone presentation (Dec 11, illustrative)"],
         ),
     ]
 
@@ -246,5 +266,45 @@ def set_permission_mode(mode: str) -> None:
             ON CONFLICT(key) DO UPDATE SET value = excluded.value
             """,
             (mode,),
+        )
+        conn.commit()
+
+
+def seen_opportunity_keys() -> set[str]:
+    init_db()
+    with connect() as conn:
+        return {r["dedup_key"] for r in conn.execute("SELECT dedup_key FROM radar_opportunities")}
+
+
+def save_opportunity(dedup_key: str, data_json: str, first_seen: str) -> None:
+    init_db()
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO radar_opportunities (dedup_key, data_json, first_seen)
+            VALUES (?, ?, ?)
+            ON CONFLICT(dedup_key) DO UPDATE SET data_json = excluded.data_json
+            """,
+            (dedup_key, data_json, first_seen),
+        )
+        conn.commit()
+
+
+def get_setting_json(key: str) -> str | None:
+    init_db()
+    with connect() as conn:
+        row = conn.execute("SELECT value FROM settings_kv WHERE key = ?", (key,)).fetchone()
+        return row["value"] if row else None
+
+
+def set_setting_json(key: str, value: str) -> None:
+    init_db()
+    with connect() as conn:
+        conn.execute(
+            """
+            INSERT INTO settings_kv (key, value) VALUES (?, ?)
+            ON CONFLICT(key) DO UPDATE SET value = excluded.value
+            """,
+            (key, value),
         )
         conn.commit()

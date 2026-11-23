@@ -78,6 +78,10 @@ class LifeBlueprint(BaseModel):
     health: str = ""
     legacy: str = ""
     goals: list[Goal] = Field(default_factory=list)
+    # Personal Constitution inputs for Strategic Radar (optional; older saved blueprints lack them).
+    mission: str = ""
+    guiding_principles: list[str] = Field(default_factory=list)
+    strategic_objectives: list[str] = Field(default_factory=list)
 
 
 class OpportunityCostItem(BaseModel):
