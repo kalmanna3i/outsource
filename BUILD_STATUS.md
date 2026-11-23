@@ -3,7 +3,7 @@
 **Public repo:** https://github.com/kalmanna3i/outsource  
 **Kay Al Mannai · MGT 409 · Nov 23, 2026**
 
-**Tests:** `APP_MODE=demo pytest -q tests/` → run locally after merge (Priority 0 + Contextual + Radar + Stacking)  
+**Tests:** `APP_MODE=demo pytest -q tests/` → **55 passed** (Priority 0 + Contextual + Strategic Radar + Opportunity Stacking)  
 **Demo:** Priority 0 E2E verified (demo fixtures + UI screenshots embedded in `deliverables/report.html` / `slides.html`)  
 **Opportunity Stacking:** **Simulated integration** — illustrative matrix, deterministic hours, Chief of Staff bundle pick, six Life Dimension strategists (L01–L06, demo fixtures; live wired like Priority 0).  
 **Live tokens:** **Measured** Nov 23 (5:37 PM ET): one live run + resume on gpt-6-luna via OpenAI directly (course Portkey key returned 401 on that path). 8 calls · 4,283 input / 0 cached / 5,387 output tokens · $0.003122 · 49.1 s. See Report §5 and the Cost slide.
