@@ -18,3 +18,4 @@ build/
 .coverage
 htmlcov/
 *.log
+.pytest_deps/

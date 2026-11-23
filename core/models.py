@@ -199,3 +199,131 @@ class PersonProfile(BaseModel):
     notes: str = ""
     birthday: str | None = None
     milestones: list[str] = Field(default_factory=list)
+
+
+# --- Opportunity Stacking (Life Dimensions) ---
+
+
+class LifeDimension(str, Enum):
+    FRIEND = "friend"
+    COLLEAGUE = "colleague"
+    PHILANTHROPIST = "philanthropist"
+    COMMUNITY_MEMBER = "community_member"
+    MENTOR = "mentor"
+    MENTEE = "mentee"
+
+
+class BenefitKind(str, Enum):
+    DIRECT = "direct"
+    INDIRECT = "indirect"
+    COMPLEMENTARY = "complementary"
+    OVERLAPPING = "overlapping"
+    SPECULATIVE = "speculative"
+    VERIFIED = "verified"
+
+
+class ContributionLevel(str, Enum):
+    STRONG = "strong"
+    MODERATE = "moderate"
+    LIMITED = "limited"
+
+
+_LEVEL_WEIGHT = {
+    ContributionLevel.STRONG: 1.0,
+    ContributionLevel.MODERATE: 0.6,
+    ContributionLevel.LIMITED: 0.3,
+}
+
+
+class DimensionContribution(BaseModel):
+    dimension: LifeDimension
+    level: ContributionLevel
+    benefit_kind: BenefitKind
+    rationale: str = ""
+    labeled_illustrative: bool = True
+
+
+class MatrixColumn(str, Enum):
+    GIVING_BACK = "giving_back"
+    CAREER = "career"
+    LEARNING = "learning"
+    BUSINESS = "business"
+    NETWORK = "network"
+
+
+class MatrixCell(BaseModel):
+    column: MatrixColumn
+    level: ContributionLevel
+    benefit_kind: BenefitKind
+    note: str = ""
+
+
+class PhilanthropicResearchRecord(BaseModel):
+    """Illustrative fixture fields for nonprofit / committee due diligence."""
+
+    record_id: str = Field(default_factory=lambda: new_id("phi"))
+    opportunity_label: str
+    labeled_illustrative: bool = True
+    mission: str = ""
+    community_impact: str = ""
+    governance: str = ""
+    time_commitment_hours_month: float | None = None
+    financial_contribution: str = ""
+    skills_given: list[str] = Field(default_factory=list)
+    skills_gained: list[str] = Field(default_factory=list)
+    application_path: str = ""
+    conflicts_of_interest: list[str] = Field(default_factory=list)
+    reciprocal_value_note: str = (
+        "What the user gives the organization — not only what they extract."
+    )
+    evidence_type: EvidenceType = EvidenceType.SIMULATED_FIXTURE
+
+
+class StackedOpportunity(BaseModel):
+    opportunity_id: str = Field(default_factory=lambda: new_id("opp"))
+    label: str
+    labeled_illustrative: bool = True
+    dimensions: list[DimensionContribution] = Field(default_factory=list)
+    matrix: list[MatrixCell] = Field(default_factory=list)
+    monthly_hours: float
+    philanthropy: PhilanthropicResearchRecord | None = None
+    reciprocal_value: str = ""
+
+
+class HoursComparison(BaseModel):
+    separate_commitment_hours: list[float]
+    bundled_hours: float
+    monthly_hours_saved: float
+    annual_hours_recovered: float
+    comparable_benefits_assumption: str = (
+        "Hours savings apply ONLY if the combined commitment genuinely delivers "
+        "comparable benefits across the same life dimensions."
+    )
+
+
+class StackingScore(BaseModel):
+    opportunity_id: str
+    per_dimension: dict[str, float] = Field(default_factory=dict)
+    composite: float = 0.0
+    overlapping_excluded: list[str] = Field(default_factory=list)
+    speculative_warnings: list[str] = Field(default_factory=list)
+    labeled_illustrative: bool = True
+
+
+class LifeMandateSample(BaseModel):
+    """Sample mandate for Chief of Staff comparison (illustrative fixture)."""
+
+    mandate_id: str = Field(default_factory=lambda: new_id("mandate"))
+    title: str = "Illustrative Life Mandate — growth, giving, relationships"
+    priorities: list[str] = Field(default_factory=list)
+    max_monthly_hours: float = 12.0
+    labeled_illustrative: bool = True
+
+
+class StackingRecommendation(BaseModel):
+    recommendation_id: str = Field(default_factory=lambda: new_id("rec"))
+    chosen_bundle_label: str
+    rationale: list[str] = Field(default_factory=list)
+    separate_activities_rejected: list[str] = Field(default_factory=list)
+    mandate_fit_notes: str = ""
+    labeled_illustrative: bool = True

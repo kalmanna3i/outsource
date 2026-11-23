@@ -142,5 +142,6 @@ MODULE_STATUS = {
     "My Financial Future": ("Simulated integration", "status-sim"),
     "Agent Activity": ("Operational", "status-op"),
     "Contextual Opportunities": ("Simulated integration", "status-sim"),
+    "Opportunity Stacking": ("Simulated integration", "status-sim"),
     "Settings": ("Operational", "status-op"),
 }

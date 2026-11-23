@@ -33,6 +33,7 @@ from services.finance import project_cashflow
 from services.workflow import WorkflowEngine
 from ui.contextual_page import render_contextual
 from ui.radar_page import render_network_graph, render_radar, render_radar_settings
+from ui.stacking_page import page_opportunity_stacking
 from ui.theme import CUSTOM_CSS, MODULE_STATUS
 
 st.set_page_config(
@@ -91,6 +92,7 @@ NAV = [
     "My Financial Future",
     "Agent Activity",
     "Contextual Opportunities",
+    "Opportunity Stacking",
     "Settings",
 ]
 
@@ -560,6 +562,7 @@ def main() -> None:
         "My Financial Future": page_finance,
         "Agent Activity": page_activity,
         "Contextual Opportunities": render_contextual,
+        "Opportunity Stacking": page_opportunity_stacking,
         "Settings": page_settings,
     }[page]()
 
