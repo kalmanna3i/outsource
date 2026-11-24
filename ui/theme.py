@@ -113,10 +113,47 @@ h1, h2, h3, .brand-title {
   color: white;
 }
 section[data-testid="stSidebar"] {
-  background: #0B1F33;
+  background: #0C1D2B;
 }
 section[data-testid="stSidebar"] * {
   color: #F7F3EC !important;
+}
+section[data-testid="stSidebar"] .north-star-kicker {
+  color: #B5A083 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  margin: 0.2rem 0 0.25rem;
+}
+section[data-testid="stSidebar"] .north-star {
+  color: #F8F7F3 !important;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.15rem;
+  line-height: 1.35;
+  margin: 0 0 0.8rem;
+}
+section[data-testid="stSidebar"] .mode-line {
+  color: #F8F7F3 !important;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  margin-top: 0.6rem;
+}
+section[data-testid="stSidebar"] .stButton > button,
+section[data-testid="stSidebar"] button[data-testid^="stBaseButton"] {
+  background: transparent;
+  color: #F7F3EC;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 2px;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  padding-left: 0.7rem;
+}
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"],
+section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] * {
+  color: #B5A083 !important;
+  background: transparent;
+  border-left-color: #B5A083;
 }
 div[data-testid="stSidebarNav"] { display: none; }
 .opp-card {

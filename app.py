@@ -37,7 +37,7 @@ from ui.dashboard import render_today
 from ui.mandate_page import render_mandate
 from ui.radar_page import render_network_graph, render_radar, render_radar_settings
 from ui.stacking_page import page_opportunity_stacking
-from ui.theme import CUSTOM_CSS, MODULE_STATUS
+from ui.theme import CUSTOM_CSS
 
 st.set_page_config(
     page_title="OUTSOURCE — Personal Strategy & Execution Office",
@@ -88,42 +88,93 @@ def header() -> None:
     )
 
 
-NAV_GROUPS = [
-    ("Today", ["Daily Briefing"]),
-    ("Discover", ["Strategic Radar", "Contextual Opportunities", "My Network"]),
-    ("Decide", ["My Decisions", "Opportunity Stacking"]),
-    ("My Life", ["Life Mandate", "My Life Blueprint", "My People", "My Career"]),
-    ("My Office", ["My Work", "My Attention", "My Calendar"]),
-    ("Progress", ["My Financial Future"]),
-    ("Technical logs", ["Agent Activity", "Settings"]),
+# Labels only where a page already exists. Same page may be reached by more than one label.
+NAV_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
+    ("Today", [
+        ("Daily briefing", "Daily Briefing"),
+        ("My priorities", "Life Mandate"),
+    ]),
+    ("Discover", [
+        ("Opportunity radar", "Strategic Radar"),
+        ("Hidden connections", "My Network"),
+        ("People and places", "My People"),
+        ("Strategic side quests", "Contextual Opportunities"),
+    ]),
+    ("Decide", [
+        ("Decision lab", "My Decisions"),
+        ("Opportunity stacking", "Opportunity Stacking"),
+    ]),
+    ("My Life", [
+        ("Mission and values", "Life Mandate"),
+        ("Life blueprint", "My Life Blueprint"),
+        ("My people", "My People"),
+        ("Career and ambitions", "My Career"),
+    ]),
+    ("My Office", [
+        ("Delegated work", "My Work"),
+        ("Needs my attention", "My Attention"),
+        ("Calendar", "My Calendar"),
+    ]),
+    ("Progress", [
+        ("Financial future", "My Financial Future"),
+    ]),
 ]
-NAV = [name for _group, names in NAV_GROUPS for name in names]
-GROUP_OF = {name: group for group, names in NAV_GROUPS for name in names}
+NAV_FOOTER: list[tuple[str, str]] = [
+    ("Settings", "Settings"),
+    ("AI Transparency", "Agent Activity"),
+]
+
+
+def _mode_line() -> str:
+    """One honest line from the real config. Demo stays demo when no key is present."""
+    if settings.effective_mode == "live" and settings.integration_mode != "live":
+        return "Live AI · Simulated integrations"
+    if settings.effective_mode == "live":
+        return "Live AI · Live integrations"
+    return "Demonstration mode"
+
+
+def _ensure_nav() -> None:
+    if "nav_page" not in st.session_state:
+        st.session_state.nav_page = "Daily Briefing"
+        st.session_state.nav_label = "Daily briefing"
+
+
+def _nav_button(label: str, page_id: str, *, on_sidebar: bool = False) -> None:
+    selected = st.session_state.nav_label == label
+    target = st.sidebar if on_sidebar else st
+    if target.button(
+        label,
+        key=f"nav-{label}",
+        type="primary" if selected else "secondary",
+        width="stretch",
+    ):
+        st.session_state.nav_page = page_id
+        st.session_state.nav_label = label
+        st.rerun()
 
 
 def sidebar() -> str:
-    st.sidebar.markdown("### Navigation")
-    st.sidebar.caption(
-        "Today, Discover, Decide, My Life, My Office, Progress. Technical logs are last."
-    )
-    page = st.sidebar.radio(
-        "Go to",
-        NAV,
-        format_func=lambda name: f"{GROUP_OF[name]} — {name}",
-        label_visibility="collapsed",
-    )
-    status, cls = MODULE_STATUS[page]
+    _ensure_nav()
+    mandate = load_mandate()
+    mission = mandate.mission.strip() or "Define what matters most to you."
     st.sidebar.markdown(
-        f'<p class="{cls}">Module status: {status}</p>',
+        f'<p class="north-star-kicker">North Star</p><p class="north-star">{mission}</p>',
         unsafe_allow_html=True,
     )
-    st.sidebar.markdown("---")
-    st.sidebar.caption(
-        f"APP_MODE={settings.app_mode} · LLM_MODE={settings.llm_mode} · "
-        f"INTEGRATION_MODE={settings.integration_mode} → model **{settings.effective_mode}**"
+    active = next(
+        (group for group, items in NAV_GROUPS if any(label == st.session_state.nav_label for label, _page in items)),
+        "Today",
     )
-    st.sidebar.caption(f"Model: {settings.model if settings.has_live_credentials else 'n/a (demo)'}")
-    return page
+    for group, items in NAV_GROUPS:
+        with st.sidebar.expander(group, expanded=(group == active)):
+            for label, page_id in items:
+                _nav_button(label, page_id)
+    st.sidebar.markdown("---")
+    for label, page_id in NAV_FOOTER:
+        _nav_button(label, page_id, on_sidebar=True)
+    st.sidebar.markdown(f'<p class="mode-line">{_mode_line()}</p>', unsafe_allow_html=True)
+    return st.session_state.nav_page
 
 
 def _progress(msg: str) -> None:
@@ -524,6 +575,9 @@ def page_settings() -> None:
     st.subheader("Settings")
     st.write(f"Model path: **{settings.effective_mode}** (LLM_MODE={settings.llm_mode})")
     st.write(f"Configured APP_MODE: `{settings.app_mode}`")
+    st.write(
+        f"Model: `{settings.model if settings.has_live_credentials else 'n/a (demo)'}`"
+    )
     st.write(
         "Email, purchases, and insurers stay simulated "
         f"(INTEGRATION_MODE={settings.integration_mode}; sending is off)."
