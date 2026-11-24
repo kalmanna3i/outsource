@@ -78,7 +78,7 @@ def universe_html(nodes: list[dict[str, Any]]) -> str:
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 640px;
+    min-height: 78vh;
     background: #101923;
     border-radius: 8px;
     overflow: hidden;
@@ -130,7 +130,7 @@ if (reduced) pauseBtn.textContent = "Motion off";
 function resize() {{
   const rect = canvas.parentElement.getBoundingClientRect();
   const nextW = Math.max(320, Math.floor(rect.width));
-  const nextH = Math.max(640, Math.floor(rect.height));
+  const nextH = Math.max(Math.floor(window.innerHeight * 0.78), Math.floor(rect.height));
   if (canvas.width === nextW && canvas.height === nextH) return;
   canvas.width = nextW;
   canvas.height = nextH;
@@ -157,18 +157,18 @@ function arrange(time) {{
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
   const drift = paused ? 0 : time * 0.00008;
-  const rx = Math.max(180, canvas.width / 2 - 120);
-  const ry = Math.max(170, canvas.height / 2 - 150);
+  const rx = Math.max(160, canvas.width / 2 - 36);
+  const ry = Math.max(160, canvas.height / 2 - 36);
   const placed = ring.map((node, i) => {{
     const angle = drift + (Math.PI * 2 * i) / Math.max(ring.length, 1) - Math.PI / 2;
     const x = cx + Math.cos(angle) * rx;
     const y = cy + Math.sin(angle) * ry;
     const kids = (children[node.key] || []).map((child, k) => {{
-      const dist = 58 + k * 46;
+      const dist = 62 + k * 44;
       return {{
         ...child,
-        x: x + Math.cos(angle) * dist,
-        y: y + Math.sin(angle) * dist,
+        x: x - Math.cos(angle) * dist,
+        y: y - Math.sin(angle) * dist,
         angle
       }};
     }});
@@ -182,18 +182,18 @@ function arrange(time) {{
   }});
   flat.forEach((node) => {{
     const lines = node.lines;
-    ctx.font = "400 13px Source Sans 3, sans-serif";
+    ctx.font = "400 12px Source Sans 3, sans-serif";
     const width = Math.max(...lines.map((line) => ctx.measureText(line).width));
-    const height = lines.length * 16;
+    const height = lines.length * 15;
     const outward = node.angle === undefined ? 0 : node.angle;
-    const dist = 16 + width / 2 * Math.abs(Math.cos(outward)) + height / 2 * Math.abs(Math.sin(outward));
-    node.lx = node.x + Math.cos(outward) * dist;
-    node.ly = node.y + Math.sin(outward) * dist;
+    const dist = 14 + width / 2 * Math.abs(Math.cos(outward)) + height / 2 * Math.abs(Math.sin(outward));
+    node.lx = node.x - Math.cos(outward) * dist;
+    node.ly = node.y - Math.sin(outward) * dist;
     node.lw = width;
     node.lh = height;
     node.lines = lines;
   }});
-  for (let pass = 0; pass < 24; pass += 1) {{
+  for (let pass = 0; pass < 40; pass += 1) {{
     let moved = false;
     for (let i = 0; i < flat.length; i += 1) {{
       for (let j = i + 1; j < flat.length; j += 1) {{
@@ -256,27 +256,39 @@ function draw(time) {{
     const next = placed[(i + 1) % placed.length];
     const across = placed[(i + 3) % placed.length];
     if (!next || placed.length < 2) return;
-    ctx.strokeStyle = "rgba(131,183,161,0.4)";
-    ctx.lineWidth = 0.45;
+    ctx.save();
+    ctx.shadowColor = "rgba(166, 224, 204, 0.95)";
+    ctx.shadowBlur = 7;
+    ctx.strokeStyle = "rgba(214, 244, 232, 0.9)";
+    ctx.lineWidth = 0.7;
     ctx.beginPath();
     ctx.moveTo(node.x, node.y);
     ctx.lineTo(next.x, next.y);
     ctx.stroke();
+    ctx.restore();
     if (across && across !== next && across !== node) {{
-      ctx.strokeStyle = "rgba(154,171,187,0.16)";
-      ctx.lineWidth = 0.35;
+      ctx.save();
+      ctx.shadowColor = "rgba(154,171,187,0.45)";
+      ctx.shadowBlur = 4;
+      ctx.strokeStyle = "rgba(201, 214, 224, 0.28)";
+      ctx.lineWidth = 0.45;
       ctx.beginPath();
       ctx.moveTo(node.x, node.y);
       ctx.lineTo(across.x, across.y);
       ctx.stroke();
+      ctx.restore();
     }}
     node.kids.forEach((child) => {{
-      ctx.strokeStyle = "rgba(154,171,187,0.55)";
-      ctx.lineWidth = 0.4;
+      ctx.save();
+      ctx.shadowColor = "rgba(181,160,131,0.7)";
+      ctx.shadowBlur = 5;
+      ctx.strokeStyle = "rgba(232, 220, 200, 0.7)";
+      ctx.lineWidth = 0.45;
       ctx.beginPath();
       ctx.moveTo(node.x, node.y);
       ctx.lineTo(child.x, child.y);
       ctx.stroke();
+      ctx.restore();
     }});
   }});
   if (!paused && placed.length) {{
@@ -304,10 +316,10 @@ function draw(time) {{
     ctx.arc(node.x, node.y, node.kids ? 3.1 : 2.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#E9EDF2";
-    ctx.font = "400 13px Source Sans 3, sans-serif";
+    ctx.font = "400 12px Source Sans 3, sans-serif";
     ctx.textAlign = "center";
     node.lines.forEach((line, index) => {{
-      const y = node.ly - node.lh / 2 + 13 + index * 16;
+      const y = node.ly - node.lh / 2 + 12 + index * 15;
       ctx.fillText(line, node.lx, y);
     }});
   }});
@@ -354,4 +366,4 @@ def render_living_universe(mandate, blueprint, assessments: dict[str, int]) -> N
             height=80,
         )
         return
-    components.html(universe_html(nodes), height=640, scrolling=False)
+    components.html(universe_html(nodes), height=780, scrolling=False)

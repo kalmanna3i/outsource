@@ -75,32 +75,48 @@ h1, h2, h3, [data-testid="stHeading"], [data-testid="stHeading"] * {
 }
 .metric-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin: 0 0 0.7rem;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  margin: 0 0 0.4rem;
+  position: relative;
+  z-index: 2;
 }
 .metric-card {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 0.38rem 0.6rem 0.32rem;
-  min-width: 6.6rem;
+  border-radius: 4px;
+  padding: 0.18rem 0.45rem 0.14rem;
+  min-width: 0;
+  flex: 1 1 0;
 }
 .metric-card .k {
-  font-size: 0.64rem;
-  letter-spacing: 0.05em;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--muted);
+  line-height: 1.2;
 }
 .metric-card .v {
-  font-size: 0.98rem;
+  font-size: 0.82rem;
   font-weight: 500;
   color: var(--text);
-  line-height: 1.25;
+  line-height: 1.15;
 }
 .metric-card .s {
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   color: var(--muted);
+  line-height: 1.2;
+}
+[data-testid="stMain"] [data-testid="stElementContainer"]:has(iframe),
+[data-testid="stMain"] iframe {
+  width: 100% !important;
+  height: 78vh !important;
+  min-height: 78vh !important;
+  max-height: none !important;
+  display: block;
+  position: relative;
+  z-index: 1;
+  border: 0;
 }
 .network-legend {
   font-family: 'Source Sans 3', sans-serif;
