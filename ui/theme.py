@@ -17,9 +17,35 @@ CUSTOM_CSS = """
 }
 
 .stApp {
-  background: #F7F3EC;
+  background: var(--ivory);
   color: var(--ink);
+  color-scheme: light;
   font-family: 'Source Sans 3', sans-serif;
+}
+
+/* Ivory surfaces keep dark text. Dark-mode Streamlit otherwise paints
+   fields brown (#2D2B27) while this rule's ink color stays on the text. */
+[data-testid="stMain"] [data-testid="stWidgetLabel"],
+[data-testid="stMain"] [data-testid="stWidgetLabel"] * {
+  color: var(--ink) !important;
+}
+[data-testid="stMain"] [data-testid="stTextAreaRootElement"],
+[data-testid="stMain"] [data-testid="stTextInputRootElement"],
+[data-testid="stMain"] [data-testid="stNumberInputContainer"] {
+  background-color: #FFFDF8 !important;
+  color: var(--ink) !important;
+}
+[data-testid="stMain"] textarea,
+[data-testid="stMain"] input:not([type="checkbox"]):not([type="radio"]) {
+  background-color: transparent;
+  color: var(--ink) !important;
+  -webkit-text-fill-color: var(--ink) !important;
+  caret-color: var(--ink);
+}
+[data-testid="stMain"] textarea::placeholder,
+[data-testid="stMain"] input::placeholder {
+  color: var(--muted) !important;
+  -webkit-text-fill-color: var(--muted) !important;
 }
 
 h1, h2, h3, .brand-title {
