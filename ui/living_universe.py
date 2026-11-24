@@ -73,9 +73,12 @@ def universe_html(nodes: list[dict[str, Any]]) -> str:
 </div>
 <script id="universe-data" type="application/json">{payload}</script>
 <style>
+  html, body {{ margin: 0; height: 100%; background: #101923; }}
   #universe {{
     position: relative;
-    height: 520px;
+    width: 100%;
+    height: 100%;
+    min-height: 640px;
     background: #101923;
     border-radius: 8px;
     overflow: hidden;
@@ -126,11 +129,13 @@ if (reduced) pauseBtn.textContent = "Motion off";
 
 function resize() {{
   const rect = canvas.parentElement.getBoundingClientRect();
-  canvas.width = Math.max(320, rect.width);
-  canvas.height = 520;
+  const nextW = Math.max(320, Math.floor(rect.width));
+  const nextH = Math.max(640, Math.floor(rect.height));
+  if (canvas.width === nextW && canvas.height === nextH) return;
+  canvas.width = nextW;
+  canvas.height = nextH;
+  if (paused) draw(0);
 }}
-resize();
-window.addEventListener("resize", resize);
 
 const particles = Array.from({{length: 42}}, (_, i) => ({{
   edge: i % Math.max(nodes.length, 1),
@@ -152,8 +157,8 @@ function arrange(time) {{
   const cx = canvas.width / 2;
   const cy = canvas.height / 2;
   const drift = paused ? 0 : time * 0.00008;
-  const rx = Math.min(canvas.width * 0.34, 380);
-  const ry = 150;
+  const rx = Math.max(180, canvas.width / 2 - 120);
+  const ry = Math.max(170, canvas.height / 2 - 150);
   const placed = ring.map((node, i) => {{
     const angle = drift + (Math.PI * 2 * i) / Math.max(ring.length, 1) - Math.PI / 2;
     const x = cx + Math.cos(angle) * rx;
@@ -177,9 +182,9 @@ function arrange(time) {{
   }});
   flat.forEach((node) => {{
     const lines = node.lines;
-    ctx.font = "400 11px Source Sans 3, sans-serif";
+    ctx.font = "400 13px Source Sans 3, sans-serif";
     const width = Math.max(...lines.map((line) => ctx.measureText(line).width));
-    const height = lines.length * 15;
+    const height = lines.length * 16;
     const outward = node.angle === undefined ? 0 : node.angle;
     const dist = 16 + width / 2 * Math.abs(Math.cos(outward)) + height / 2 * Math.abs(Math.sin(outward));
     node.lx = node.x + Math.cos(outward) * dist;
@@ -240,7 +245,8 @@ function draw(time) {{
   const cy = canvas.height / 2;
   for (let i = 0; i < 72; i += 1) {{
     const angle = (i * 2.399) % (Math.PI * 2);
-    const reach = 28 + (i % 11) * 16;
+    const span = Math.min(canvas.width, canvas.height);
+    const reach = span * (0.08 + (i % 11) * 0.03);
     ctx.fillStyle = "rgba(233,237,242,0.22)";
     ctx.beginPath();
     ctx.arc(cx + Math.cos(angle) * reach, cy + Math.sin(angle) * reach * 0.58, 0.7, 0, Math.PI * 2);
@@ -298,10 +304,10 @@ function draw(time) {{
     ctx.arc(node.x, node.y, node.kids ? 3.1 : 2.2, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = "#E9EDF2";
-    ctx.font = "400 11px Source Sans 3, sans-serif";
+    ctx.font = "400 13px Source Sans 3, sans-serif";
     ctx.textAlign = "center";
     node.lines.forEach((line, index) => {{
-      const y = node.ly - node.lh / 2 + 12 + index * 15;
+      const y = node.ly - node.lh / 2 + 13 + index * 16;
       ctx.fillText(line, node.lx, y);
     }});
   }});
@@ -332,6 +338,9 @@ canvas.addEventListener("click", (event) => {{
   detail.hidden = false;
 }});
 document.getElementById("close").addEventListener("click", () => {{ detail.hidden = true; }});
+resize();
+window.addEventListener("resize", resize);
+if (window.ResizeObserver) new ResizeObserver(resize).observe(canvas.parentElement);
 requestAnimationFrame(draw);
 </script>
 """
@@ -345,4 +354,4 @@ def render_living_universe(mandate, blueprint, assessments: dict[str, int]) -> N
             height=80,
         )
         return
-    components.html(universe_html(nodes), height=540, scrolling=False)
+    components.html(universe_html(nodes), height=640, scrolling=False)
