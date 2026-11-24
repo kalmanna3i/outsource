@@ -33,6 +33,7 @@ from database.db import (
 from services.finance import project_cashflow
 from services.workflow import WorkflowEngine
 from ui.contextual_page import render_contextual
+from ui.dashboard import render_today
 from ui.mandate_page import render_mandate
 from ui.radar_page import render_network_graph, render_radar, render_radar_settings
 from ui.stacking_page import page_opportunity_stacking
@@ -87,29 +88,30 @@ def header() -> None:
     )
 
 
-NAV = [
-    "Daily Briefing",
-    "Life Mandate",
-    "Strategic Radar",
-    "My Life Blueprint",
-    "My Decisions",
-    "My Work",
-    "My Attention",
-    "My Calendar",
-    "My People",
-    "My Network",
-    "My Career",
-    "My Financial Future",
-    "Agent Activity",
-    "Contextual Opportunities",
-    "Opportunity Stacking",
-    "Settings",
+NAV_GROUPS = [
+    ("Today", ["Daily Briefing"]),
+    ("Discover", ["Strategic Radar", "Contextual Opportunities", "My Network"]),
+    ("Decide", ["My Decisions", "Opportunity Stacking"]),
+    ("My Life", ["Life Mandate", "My Life Blueprint", "My People", "My Career"]),
+    ("My Office", ["My Work", "My Attention", "My Calendar"]),
+    ("Progress", ["My Financial Future"]),
+    ("Technical logs", ["Agent Activity", "Settings"]),
 ]
+NAV = [name for _group, names in NAV_GROUPS for name in names]
+GROUP_OF = {name: group for group, names in NAV_GROUPS for name in names}
 
 
 def sidebar() -> str:
     st.sidebar.markdown("### Navigation")
-    page = st.sidebar.radio("Go to", NAV, label_visibility="collapsed")
+    st.sidebar.caption(
+        "Today, Discover, Decide, My Life, My Office, Progress. Technical logs are last."
+    )
+    page = st.sidebar.radio(
+        "Go to",
+        NAV,
+        format_func=lambda name: f"{GROUP_OF[name]} — {name}",
+        label_visibility="collapsed",
+    )
     status, cls = MODULE_STATUS[page]
     st.sidebar.markdown(
         f'<p class="{cls}">Module status: {status}</p>',
@@ -129,6 +131,7 @@ def _progress(msg: str) -> None:
 
 
 def page_briefing() -> None:
+    render_today(load_mandate(), load_blueprint(), st.session_state.workflow)
     st.subheader("Daily Briefing")
     st.caption("Universal intake — OUTSOURCE decides what AI vs human should own.")
 

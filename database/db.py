@@ -393,6 +393,42 @@ def update_priorities(priorities: list[str], editor: str) -> LifeMandate:
     return approve_mandate(nxt, editor)
 
 
+def save_daily_checkin(day: str, payload: dict, user_id: str = "local") -> None:
+    """One row per user and day. Saving again replaces that day. It does not invent other days."""
+    set_setting_json(f"daily_checkin:{user_id}:{day}", json.dumps(payload))
+
+
+def load_daily_checkin(day: str, user_id: str = "local") -> dict | None:
+    raw = get_setting_json(f"daily_checkin:{user_id}:{day}")
+    if not raw:
+        return None
+    data = json.loads(raw)
+    return data if isinstance(data, dict) else None
+
+
+def save_assessments(scores: dict[str, int], user_id: str = "local") -> None:
+    """Saved 0–10 dimension assessments. Missing keys are not filled in."""
+    clean = {str(key): int(value) for key, value in scores.items()}
+    set_setting_json(f"assessments:{user_id}", json.dumps(clean))
+
+
+def load_assessments(user_id: str = "local") -> dict[str, int]:
+    raw = get_setting_json(f"assessments:{user_id}")
+    if not raw:
+        return {}
+    data = json.loads(raw)
+    if not isinstance(data, dict):
+        return {}
+    out: dict[str, int] = {}
+    for key, value in data.items():
+        try:
+            number = int(value)
+        except (TypeError, ValueError):
+            continue
+        out[str(key)] = max(0, min(10, number))
+    return out
+
+
 def set_setting_json(key: str, value: str) -> None:
     init_db()
     with connect() as conn:
