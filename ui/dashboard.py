@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 import streamlit as st
 
@@ -11,74 +12,132 @@ from core.config import get_settings
 from core.llm import LLMClient
 from database.db import (
     load_aspirations,
+    load_assessment_history,
     load_assessments,
     load_daily_checkin,
     save_assessments,
     save_daily_checkin,
 )
-from services.radar_graph import figure as network_figure
 from services.universe import (
     active_dimensions,
     ask_decision,
-    assessed_scores,
     capability_gaps,
     daily_plan_text,
 )
 from ui.living_universe import render_living_universe
 from ui.strategic_charts import (
     capability_gap_chart,
-    life_radar,
-    opportunity_bubbles,
+    dimension_levels,
+    history_line,
     opportunity_heatmap,
     spending_comparison,
 )
 
 
 def _today() -> str:
+    """Same UTC day the check-in was saved under. The header date stays local."""
     return datetime.now(timezone.utc).date().isoformat()
 
 
+def _mode_line() -> str:
+    settings = get_settings()
+    if settings.effective_mode == "live" and settings.integration_mode != "live":
+        return "Live AI · Simulated integrations"
+    if settings.effective_mode == "live":
+        return "Live AI · Live integrations"
+    return "Demonstration mode"
+
+
+def _spark(values: list[int]) -> str:
+    """A line only when two or more saved points exist. One point stays a number."""
+    if len(values) < 2:
+        return ""
+    low, high = min(values), max(values)
+    span = high - low or 1
+    width, height = 120, 28
+    coords = []
+    for index, value in enumerate(values):
+        x = 2 + (width - 4) * index / (len(values) - 1)
+        y = height - 4 - (height - 8) * (value - low) / span
+        coords.append(f"{x:.1f},{y:.1f}")
+    return (
+        f"<svg class='spark' viewBox='0 0 {width} {height}' aria-hidden='true'>"
+        f"<polyline points='{' '.join(coords)}'/></svg>"
+    )
+
+
 def render_today(mandate, blueprint, workflow) -> None:
-    st.markdown('<p class="life-headline">Your life, in motion</p>', unsafe_allow_html=True)
-    _question(mandate, workflow)
+    assessments = load_assessments()
+    _identity(blueprint)
     mission = (mandate.mission or "").strip() or "No mission is saved yet."
     st.markdown(f'<p class="life-mission">{html.escape(mission)}</p>', unsafe_allow_html=True)
-    assessments = load_assessments()
+    _question(mandate, workflow)
     _stored_cards(mandate, blueprint, assessments)
-    render_living_universe(mandate, blueprint, assessments)
+    graph, side = st.columns([1.35, 1], gap="medium")
+    with graph:
+        st.markdown("<p class='section-label'>Network</p>", unsafe_allow_html=True)
+        render_living_universe(mandate, blueprint, assessments)
+    with side:
+        _today_side(mandate)
+    _charts(mandate, blueprint, assessments)
     _checkin()
     _assessments(mandate, blueprint, assessments)
-    _charts(mandate, blueprint, assessments)
+
+
+def _identity(blueprint) -> None:
+    name = getattr(blueprint, "user_name", "") or "Local"
+    when = datetime.now(ZoneInfo("America/New_York")).strftime("%b %-d")
+    st.markdown(
+        "<p class='life-headline'>Personal overview</p>"
+        f"<p class='life-meta'>{html.escape(name)} · {html.escape(when)} · {html.escape(_mode_line())}</p>",
+        unsafe_allow_html=True,
+    )
 
 
 def _stored_cards(mandate, blueprint, assessments: dict[str, int]) -> None:
-    """Compact cards for stored records only. No sparklines and no filled-in series."""
+    """Up to four stored records. A sparkline is drawn only from saved history."""
     names = {item["key"]: item["name"] for item in active_dimensions(mandate, blueprint)}
-    cards = [
-        ("Saved mandate", f"{mandate.time_budget_hours_week:g} h/wk", "Time budget"),
-        ("Saved mandate", f"${mandate.money_budget_usd_month:g}/mo", "Money budget"),
+    history = load_assessment_history()
+    cards: list[tuple[str, str, str, list[int]]] = [
+        ("Time budget", f"{mandate.time_budget_hours_week:g} h/wk", "Saved mandate", []),
+        ("Money budget", f"${mandate.money_budget_usd_month:g}/mo", "Saved mandate", []),
     ]
     checkin = load_daily_checkin(_today())
     if checkin:
-        cards.append(("Today's check-in", f"{int(checkin['energy'])}/5", "Energy"))
+        cards.append(("Energy", f"{int(checkin['energy'])}/5", "Today's check-in", []))
     for key, score in assessments.items():
-        cards.append(("Saved assessment", f"{int(score)}/10", names.get(key, key)))
-    for key, score in load_aspirations().items():
-        cards.append(("Aspiration", f"{int(score)}/10", names.get(key, key)))
+        series = [int(row["scores"][key]) for row in history if key in row["scores"]]
+        cards.append((names.get(key, key), f"{int(score)}/10", "Saved assessment", series))
+        if len(cards) >= 4:
+            break
     bits = []
-    for source, value, label in cards:
+    for label, value, source, series in cards[:4]:
         bits.append(
             "<div class='metric-card'>"
             f"<div class='k'>{html.escape(source)}</div>"
             f"<div class='v'>{html.escape(value)}</div>"
             f"<div class='s'>{html.escape(label)}</div>"
+            f"{_spark(series)}"
             "</div>"
         )
     st.markdown(f"<div class='metric-row'>{''.join(bits)}</div>", unsafe_allow_html=True)
 
 
+def _today_side(mandate) -> None:
+    st.markdown("<p class='section-label'>Today</p>", unsafe_allow_html=True)
+    checkin = load_daily_checkin(_today())
+    st.markdown(daily_plan_text(checkin))
+    if mandate.priorities:
+        joined = ", ".join(str(item) for item in mandate.priorities)
+        st.caption(f"Saved priorities: {joined}")
+
+
 def _question(mandate, workflow) -> None:
-    question = st.text_input("What would you like to explore today?", key="universe_question")
+    question = st.text_input(
+        "Explore a decision or opportunity...",
+        key="universe_question",
+        placeholder="Explore a decision or opportunity...",
+    )
     asked = st.session_state.setdefault("universe_answers", {})
     if st.button("Ask the office"):
         text = question.strip()
@@ -165,51 +224,77 @@ def _assessments(mandate, blueprint, assessments: dict[str, int]) -> None:
 
 def _charts(mandate, blueprint, assessments: dict[str, int]) -> None:
     dimensions = active_dimensions(mandate, blueprint)
-    if len(assessed_scores(dimensions, assessments)) >= 3:
-        st.markdown("#### Life radar")
-        st.plotly_chart(life_radar(dimensions, assessments), use_container_width=True)
-    gaps = capability_gaps(dimensions, assessments)
-    if gaps:
-        st.markdown("#### Capability gaps")
-        st.plotly_chart(capability_gap_chart(dimensions, assessments), use_container_width=True)
-        st.caption("Gap = stored goal importance minus your saved assessment. Unsaved dimensions are omitted.")
+    names = {item["key"]: item["name"] for item in dimensions}
+    history = load_assessment_history()
+    series_key = None
+    best: list[dict] = []
+    for key in names:
+        points = [
+            {"recorded_at": row["recorded_at"], "score": row["scores"][key]}
+            for row in history
+            if key in row["scores"]
+        ]
+        if len(points) > len(best):
+            best = points
+            series_key = key
+    aspirations = load_aspirations()
+    left, right = st.columns(2, gap="medium")
+    with left:
+        st.markdown("<p class='section-label'>Development trajectory</p>", unsafe_allow_html=True)
+        if series_key and best:
+            st.caption(names[series_key])
+            st.plotly_chart(history_line(best), use_container_width=True)
+        else:
+            st.caption("No saved history yet.")
+    with right:
+        st.markdown("<p class='section-label'>Current and desired</p>", unsafe_allow_html=True)
+        shown = False
+        for key, name in names.items():
+            current = assessments.get(key)
+            desired = aspirations.get(key)
+            if current is None and desired is None:
+                continue
+            st.caption(name)
+            st.plotly_chart(dimension_levels(current, desired), use_container_width=True)
+            shown = True
+            break
+        if not shown:
+            gaps = capability_gaps(dimensions, assessments)
+            if gaps:
+                st.plotly_chart(capability_gap_chart(dimensions, assessments), use_container_width=True)
+                st.caption(
+                    "Gap = stored goal importance minus your saved assessment. "
+                    "Unsaved dimensions are omitted."
+                )
+            else:
+                st.caption("Nothing is saved for current or desired yet.")
 
-    st.markdown("#### Opportunity heatmap")
-    heat, heat_note = opportunity_heatmap(mandate)
-    st.plotly_chart(heat, use_container_width=True)
-    st.caption(heat_note)
-
-    st.markdown("#### Strategic value, cost, and time")
-    bubbles, bubble_note = opportunity_bubbles(mandate)
-    st.plotly_chart(bubbles, use_container_width=True)
-    st.caption(bubble_note)
-
-    st.markdown("#### Intersection graph")
-    st.caption(
-        "Reused from Strategic Radar. Solid edges are verified citations. "
-        "Dashed edges are hypothetical and are not relationships."
-    )
-    st.plotly_chart(network_figure(), use_container_width=True)
-
-    st.markdown("#### Spending comparison")
-    st.caption(
-        "These fields recalculate the labeled catalog. They do not change the saved mandate "
-        "and they do not spend money."
-    )
-    hours = st.number_input(
-        "Comparison time budget (hours / week)",
-        min_value=0.0,
-        value=float(mandate.time_budget_hours_week),
-        step=1.0,
-        key="compare_hours",
-    )
-    money = st.number_input(
-        "Comparison money budget (USD / month)",
-        min_value=0.0,
-        value=float(mandate.money_budget_usd_month),
-        step=50.0,
-        key="compare_money",
-    )
-    spent, note = spending_comparison(mandate, hours, money)
-    st.plotly_chart(spent, use_container_width=True)
-    st.caption(note)
+    heat_col, spend_col = st.columns(2, gap="medium")
+    with heat_col:
+        st.markdown("<p class='section-label'>Opportunity stacking</p>", unsafe_allow_html=True)
+        heat, heat_note = opportunity_heatmap(mandate)
+        st.plotly_chart(heat, use_container_width=True)
+        st.caption(heat_note)
+    with spend_col:
+        st.markdown("<p class='section-label'>Strategic spending</p>", unsafe_allow_html=True)
+        st.caption(
+            "These fields recalculate the labeled catalog. They do not change the saved mandate "
+            "and they do not spend money."
+        )
+        hours = st.number_input(
+            "Comparison time budget (hours / week)",
+            min_value=0.0,
+            value=float(mandate.time_budget_hours_week),
+            step=1.0,
+            key="compare_hours",
+        )
+        money = st.number_input(
+            "Comparison money budget (USD / month)",
+            min_value=0.0,
+            value=float(mandate.money_budget_usd_month),
+            step=50.0,
+            key="compare_money",
+        )
+        spent, note = spending_comparison(mandate, hours, money)
+        st.plotly_chart(spent, use_container_width=True)
+        st.caption(note)

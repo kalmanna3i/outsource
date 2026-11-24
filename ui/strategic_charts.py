@@ -15,19 +15,19 @@ from services.universe import (
     spending_snapshot,
 )
 
-NAVY = "#9AABBB"
-IVORY = "#101923"
-SAGE = "#83B7A1"
+NAVY = "#8D98A8"
+IVORY = "#11161F"
+SAGE = "#80B5A4"
 CHAMPAGNE = "#B5A083"
 INK = "#E9EDF2"
-GRID = "#243044"
+GRID = "rgba(255,255,255,0.07)"
 
 
 def _layout(fig: go.Figure, height: int = 300) -> go.Figure:
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color=INK, family="Source Sans 3, sans-serif", size=11),
+        font=dict(color=INK, family="Inter, system-ui, sans-serif", size=11),
         margin=dict(l=16, r=10, t=20, b=16),
         height=height,
         legend=dict(orientation="h", y=-0.2),
@@ -82,7 +82,7 @@ def history_line(points: list[dict[str, Any]]) -> go.Figure:
             mode="lines+markers" if len(points) > 1 else "markers",
             name="Personal history",
             line=dict(color=SAGE, width=1),
-            marker=dict(color=NAVY, size=10),
+            marker=dict(color=NAVY, size=4),
         )
     )
     fig.update_yaxes(range=[0, 10], title="Saved score", gridcolor=GRID)

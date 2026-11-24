@@ -2,29 +2,32 @@
 
 CUSTOM_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
 
 :root {
-  --bg: #090F18;
-  --card: #101923;
+  --bg: #0B0E14;
+  --card: #11161F;
+  --secondary: #151C27;
   --text: #E9EDF2;
-  --muted: #9AABBB;
-  --sage: #83B7A1;
+  --muted: #8D98A8;
+  --sage: #80B5A4;
   --champagne: #B5A083;
-  --line: #243044;
+  --line: rgba(255,255,255,.07);
 }
 
 .stApp {
   background: var(--bg);
   color: var(--text);
   color-scheme: dark;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 [data-testid="stMain"] [data-testid="stWidgetLabel"],
 [data-testid="stMain"] [data-testid="stWidgetLabel"] * {
   color: var(--text) !important;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-weight: 400;
 }
 [data-testid="stMain"] [data-testid="stTextAreaRootElement"],
@@ -47,31 +50,45 @@ CUSTOM_CSS = """
 }
 
 h1, h2, h3, [data-testid="stHeading"], [data-testid="stHeading"] * {
-  font-family: 'Source Sans 3', sans-serif !important;
+  font-family: Inter, system-ui, sans-serif !important;
   font-weight: 500 !important;
   color: var(--text);
   letter-spacing: 0;
 }
 
-[data-testid="stHeading"] h1 { font-size: 1.25rem !important; }
-[data-testid="stHeading"] h2 { font-size: 1.02rem !important; }
-[data-testid="stHeading"] h3, [data-testid="stHeading"] h4 { font-size: 0.92rem !important; }
+[data-testid="stHeading"] h1 { font-size: 1.35rem !important; }
+[data-testid="stHeading"] h2 { font-size: 1.05rem !important; }
+[data-testid="stHeading"] h3, [data-testid="stHeading"] h4 { font-size: 0.95rem !important; }
 
 .life-headline {
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-weight: 500;
-  font-size: 1.2rem;
+  font-size: 30px;
   color: var(--text);
-  margin: 0 0 0.25rem;
+  margin: 0;
+  line-height: 1.2;
+}
+.life-meta {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0.2rem 0 0;
 }
 .life-mission {
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-weight: 400;
-  font-size: 0.84rem;
-  color: var(--muted);
-  margin: 0.15rem 0 0.55rem;
-  max-width: 40rem;
-  line-height: 1.4;
+  font-size: 14px;
+  color: var(--text);
+  margin: 0.45rem 0 0.55rem;
+  max-width: none;
+  line-height: 1.45;
+  overflow: visible;
+  white-space: normal;
+}
+.section-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  margin: 0 0 0.35rem;
 }
 .metric-row {
   display: flex;
@@ -97,29 +114,24 @@ h1, h2, h3, [data-testid="stHeading"], [data-testid="stHeading"] * {
   line-height: 1.2;
 }
 .metric-card .v {
-  font-size: 0.82rem;
+  font-size: 28px;
   font-weight: 500;
   color: var(--text);
-  line-height: 1.15;
+  line-height: 1.1;
 }
+.spark { width: 100%; height: 22px; display: block; margin-top: 0.2rem; }
+.spark polyline, .spark circle { fill: none; stroke: #80B5A4; stroke-width: 1; }
 .metric-card .s {
   font-size: 0.62rem;
   color: var(--muted);
   line-height: 1.2;
 }
-[data-testid="stMain"] [data-testid="stElementContainer"]:has(iframe),
 [data-testid="stMain"] iframe {
   width: 100% !important;
-  height: 78vh !important;
-  min-height: 78vh !important;
-  max-height: none !important;
-  display: block;
-  position: relative;
-  z-index: 1;
   border: 0;
 }
 .network-legend {
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-size: 0.78rem;
   font-weight: 400;
   color: var(--muted);
@@ -137,7 +149,7 @@ h1, h2, h3, [data-testid="stHeading"], [data-testid="stHeading"] * {
 .kpi {
   font-size: 1.25rem;
   color: var(--text);
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-weight: 500;
 }
 .muted { color: var(--muted); font-size: 0.92rem; }
@@ -149,7 +161,7 @@ h1, h2, h3, [data-testid="stHeading"], [data-testid="stHeading"] * {
   color: var(--text);
   border: 1px solid var(--line);
   border-radius: 2px;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-weight: 400;
 }
 .stButton>button:hover {
@@ -161,7 +173,7 @@ section[data-testid="stSidebar"] {
   border-right: 1px solid var(--line);
 }
 section[data-testid="stSidebar"] {
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
 }
 section[data-testid="stSidebar"] * {
   color: var(--text) !important;
@@ -180,7 +192,7 @@ section[data-testid="stSidebar"] .north-star-kicker {
 }
 section[data-testid="stSidebar"] .north-star {
   color: var(--text) !important;
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-weight: 400;
   font-size: 0.95rem;
   line-height: 1.4;
@@ -198,16 +210,16 @@ section[data-testid="stSidebar"] button[data-testid^="stBaseButton"] {
   background: transparent;
   color: var(--text);
   border: none;
-  border-left: 3px solid transparent;
+  border-left: 1px solid transparent;
   border-radius: 2px;
   text-align: left !important;
   justify-content: flex-start !important;
   font-weight: 400 !important;
-  font-size: 0.82rem !important;
-  min-height: 1.55rem;
+  font-size: 13px !important;
+  min-height: 1.4rem;
   padding-top: 0.05rem;
   padding-bottom: 0.05rem;
-  padding-left: 0.7rem;
+  padding-left: 0.55rem;
 }
 section[data-testid="stSidebar"] [data-testid="stExpander"] details summary {
   font-size: 0.78rem;
@@ -216,9 +228,9 @@ section[data-testid="stSidebar"] [data-testid="stExpander"] details summary {
 }
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"],
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] * {
-  color: var(--champagne) !important;
-  background: transparent;
-  border-left-color: var(--champagne);
+  color: var(--sage) !important;
+  background: rgba(128, 181, 164, 0.08);
+  border-left-color: var(--sage);
   font-weight: 500 !important;
 }
 div[data-testid="stSidebarNav"] { display: none; }
@@ -236,7 +248,7 @@ div[data-testid="stSidebarNav"] { display: none; }
   font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sage);
 }
 .opp-title {
-  font-family: 'Source Sans 3', sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   font-weight: 500;
   font-size: 1.15rem;
   color: var(--text);
