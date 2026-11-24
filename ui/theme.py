@@ -102,6 +102,13 @@ h1, h2, h3, [data-testid="stHeading"], [data-testid="stHeading"] * {
   font-size: 0.68rem;
   color: var(--muted);
 }
+.network-legend {
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+  margin: 0.15rem 0 0.5rem;
+}
 
 .panel {
   background: var(--card);

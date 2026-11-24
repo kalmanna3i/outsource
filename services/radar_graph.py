@@ -234,17 +234,10 @@ def figure(graph: NetworkGraph | None = None) -> go.Figure:
         paper_bgcolor="#090F18",
         plot_bgcolor="#101923",
         font=dict(color="#E9EDF2", family="Source Sans 3, sans-serif"),
-        margin=dict(l=8, r=8, t=12, b=118),
-        height=680,
+        margin=dict(l=8, r=8, t=8, b=36),
+        height=620,
         xaxis=dict(visible=False, range=[0, CANVAS_W], constrain="domain"),
         yaxis=dict(visible=False, range=[0, CANVAS_H], scaleanchor="x"),
-        legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=-0.04,
-            x=0,
-            bgcolor="rgba(0,0,0,0)",
-            font=dict(size=10, color="#9AABBB", family="Source Sans 3, sans-serif"),
-        ),
+        showlegend=False,
     )
     return fig

@@ -145,15 +145,15 @@ def render_network_graph() -> None:
         "presented as real relationships. Illustrative personas are labeled."
     )
     st.plotly_chart(figure(graph), use_container_width=True)
-    st.markdown("**Legend**")
-    for status, style in EDGE_STYLE.items():
-        n = sum(1 for e in graph.edges if e.status == status)
-        dash = {"solid": "━━━", "dash": "╍╍╍", "dot": "┈┈┈"}[style["dash"]]
-        st.markdown(
-            f"<span style='color:{style['color']};font-weight:700'>{dash}</span> "
-            f"{style['label']} — {n} edge(s)",
-            unsafe_allow_html=True,
-        )
+    marks = {"solid": "━━", "dash": "╌╌", "dot": "┈┈"}
+    items = [
+        f"<span style='color:{style['color']}'>{marks[style['dash']]}</span> {escape(style['label'])}"
+        for style in EDGE_STYLE.values()
+    ]
+    st.markdown(
+        "<p class='network-legend'>" + " &nbsp;&nbsp; ".join(items) + "</p>",
+        unsafe_allow_html=True,
+    )
     for e in graph.edges:
         if e.status == "VERIFIED":
             st.caption(f"Verified: {e.source} → {e.target} ({e.relation}). Source: {e.source_url}, retrieved {e.retrieved_at}.")
