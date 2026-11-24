@@ -107,7 +107,7 @@ li{margin:0.2em 0}
 </table>
 <p>Radar, contextual scenarios, and the six stacking strategists were tested in demo mode. They are not in the Section 5 bill. The Life Mandate path did make three live calls (S01, D01, Q01) on a labeled dataset, not a web search. Changing an approved priority order changes the deterministic discretionary pick. The model may choose a different id. That disagreement is shown. The mission text is not rewritten to hide it.</p>
 <h3>Model choice: <code>gpt-6-luna</code> on the OpenAI API</h3>
-<p>The measured run called <code>gpt-6-luna</code> on the OpenAI API, not the course Portkey key. <code>audit/LIVE_TOKEN_USAGE.csv</code> records 13 live calls. Demo mode spends $0 for grading and module screenshots.</p>
+<p>The measured run called <code>gpt-6-luna</code> on the OpenAI API, not the course Portkey key. <code>audit/LIVE_TOKEN_USAGE.csv</code> records 14 live calls. Demo mode spends $0 for grading and module screenshots.</p>
 <h3>Step-by-step trace of the captured demo run</h3>
 <p>Workflow <code>wf_e93f8dcd2a05</code> · final status <code>COMPLETED</code> · agent calls before resume: 7 · after F06: 8.</p>
 <ol>
@@ -149,33 +149,34 @@ li{margin:0.2em 0}
 
 <h2>5. Tokenomics</h2>
 
-<p>The numbers in this section are the sum of <code>audit/LIVE_TOKEN_USAGE.csv</code> from one live process on Nov 23, 2026 at 7:28 PM ET. The model was <code>gpt-6-luna</code> on the OpenAI API. <code>LLM_MODE=live</code> and <code>INTEGRATION_MODE=simulated</code>: email, purchases, and the insurer stayed simulated. The course Portkey route was not used for this measurement. Cached input tokens were 0. Cache-write tokens were 1058, all on A02, and those tokens are already inside the input count. They are priced at $0.125 per 1M instead of $0.10, which is why the summed row cost differs from a plain input-plus-output product.</p>
-<p>Plain product with zero cache-write: $0.004905. Sum of the row costs in the CSV: <strong>$0.004931</strong>. Wall clock for the whole process: <strong>83.8 s</strong>. Model tool calls: <strong>0</strong>. The insurer step is simulated Python, not a tool call.</p>
+<p>The numbers in this section are the sum of <code>audit/LIVE_TOKEN_USAGE.csv</code> from every row in that file. The model was <code>gpt-6-luna</code> on the OpenAI API. <code>LLM_MODE=live</code> and <code>INTEGRATION_MODE=simulated</code>: email, purchases, and the insurer stayed simulated. The course Portkey route was not used for this measurement. Cached input tokens were 0. Cache-write tokens were 1058, all on A02, and those tokens are already inside the input count. They are priced at $0.125 per 1M instead of $0.10, which is why the summed row cost differs from a plain input-plus-output product.</p>
+<p>Plain product with zero cache-write: $0.004948. Sum of the row costs in the CSV: <strong>$0.004974</strong>. Sum of the duration column: <strong>86349.3 ms</strong>. Model tool calls: <strong>0</strong>. The insurer step is simulated Python, not a tool call.</p>
 <table>
 <tr><th>Call</th><th>Input</th><th>Cached</th><th>Cache write</th><th>Output</th><th>Cost</th><th>ms</th></tr>
 <tr><td>SMOKE Smoke test</td><td>30</td><td>0</td><td>0</td><td>37</td><td>$0.000022</td><td>1860.8</td></tr><tr><td>STRUCT Structured output</td><td>48</td><td>0</td><td>0</td><td>135</td><td>$0.000072</td><td>2107.0</td></tr><tr><td>A01 Chief of Staff</td><td>152</td><td>0</td><td>0</td><td>856</td><td>$0.000443</td><td>7951.3</td></tr><tr><td>A02 Life Strategy Architect</td><td>1061</td><td>0</td><td>1058</td><td>1007</td><td>$0.000636</td><td>8953.9</td></tr><tr><td>B01 Opportunity Cost Economist</td><td>906</td><td>0</td><td>0</td><td>1602</td><td>$0.000892</td><td>14535.0</td></tr><tr><td>F02 Task Decomposition and Delegation</td><td>912</td><td>0</td><td>0</td><td>1495</td><td>$0.000839</td><td>13112.7</td></tr><tr><td>F03 Autonomous Execution</td><td>203</td><td>0</td><td>0</td><td>361</td><td>$0.000201</td><td>3982.6</td></tr><tr><td>F05 Human Intervention and Handoff</td><td>138</td><td>0</td><td>0</td><td>377</td><td>$0.000202</td><td>3757.1</td></tr><tr><td>F04 Calendar and Logistics</td><td>120</td><td>0</td><td>0</td><td>220</td><td>$0.000122</td><td>2458.3</td></tr><tr><td>F06 Follow-Up and Accountability</td><td>934</td><td>0</td><td>0</td><td>661</td><td>$0.000424</td><td>5664.8</td></tr><tr><td>S01 Personal discovery</td><td>162</td><td>0</td><td>0</td><td>497</td><td>$0.000265</td><td>5527.8</td></tr><tr><td>D01 Discovery chooser</td><td>569</td><td>0</td><td>0</td><td>1002</td><td>$0.000558</td><td>9007.9</td></tr><tr><td>Q01 Independent quality auditor</td><td>252</td><td>0</td><td>0</td><td>462</td><td>$0.000256</td><td>4812.0</td></tr>
-<tr><td><strong>Total (13 live calls)</strong></td><td><strong>5487</strong></td><td><strong>0</strong></td><td><strong>1058</strong></td><td><strong>8712</strong></td><td><strong>$0.004931</strong></td><td>83.8 s wall</td></tr>
+<tr><td>Q01 Decision guide</td><td>54</td><td>0</td><td>0</td><td>75</td><td>$0.000043</td><td>2618.1</td></tr>
+<tr><td><strong>Total (14 live calls)</strong></td><td><strong>5541</strong></td><td><strong>0</strong></td><td><strong>1058</strong></td><td><strong>8787</strong></td><td><strong>$0.004974</strong></td><td>86349.3 ms</td></tr>
 </table>
-<p>Runs inside that file: a smoke JSON call, one structured-output call, Priority 0 workflow <code>wf_1fb3c7f55ef2</code> through resume (A01, A02, B01, F02, F03, F05, F04, F06), and discovery S01 → D01 → Q01. The deterministic rank for the fictional executive chose <code>infra-nonprofit</code>. The model chose <code>home-dinner</code>, which is a real id in the labeled dataset. Both are kept. The mission was not rewritten to force them to agree. Radar R01–R08, contextual C01–C02, and stacking L01–L06 were not in this live bill.</p>
+<p>Runs inside that file: a smoke JSON call, one structured-output call, Priority 0 workflow <code>wf_1fb3c7f55ef2</code> through resume (A01, A02, B01, F02, F03, F05, F04, F06), discovery S01 → D01 → Q01, and one office decision call (Q01, Decision guide). The deterministic rank for the fictional executive chose <code>infra-nonprofit</code>. The model chose <code>home-dinner</code>, which is a real id in the labeled dataset. Both are kept. The mission was not rewritten to force them to agree. Radar R01–R08, contextual C01–C02, and stacking L01–L06 were not in this live bill.</p>
 <h3>Definitions</h3>
 <ul>
 <li><strong>R</strong> = 20 workflows per user per month. That is an assumption, not a measured rate.</li>
-<li><strong>C_run</strong> = $0.004931, the summed CSV cost, not a rounded slogan.</li>
+<li><strong>C_run</strong> = $0.004974, the summed CSV cost, not a rounded slogan.</li>
 <li>Price source: <code>core/llm.py</code> <code>_EST_PRICE_PER_1M</code>. gpt-6-luna rates are OpenAI Standard short-context prices from MGT 409 Lecture 11: input $0.10, cached input $0.01, cache write $0.125, output $0.50 per 1M. This is not a provider invoice.</li>
 </ul>
 <table>
 <tr><th>Scale</th><th>Formula</th><th>Demo</th><th>Live, using this CSV and R = 20</th></tr>
-<tr><td>One measured process</td><td>C_run</td><td>$0</td><td><strong>$0.004931</strong></td></tr>
-<tr><td>Per user / month</td><td>R × C_run</td><td>$0</td><td><strong>$0.0986</strong></td></tr>
-<tr><td>100 users / month</td><td>100 × R × C_run</td><td>$0</td><td><strong>$9.86</strong></td></tr>
-<tr><td>10,000 users / month</td><td>10,000 × R × C_run</td><td>$0</td><td><strong>$986.23</strong> before caching or output caps</td></tr>
+<tr><td>Sum of the CSV</td><td>C_run</td><td>$0</td><td><strong>$0.004974</strong></td></tr>
+<tr><td>Per user / month</td><td>R × C_run</td><td>$0</td><td><strong>$0.0995</strong></td></tr>
+<tr><td>100 users / month</td><td>100 × R × C_run</td><td>$0</td><td><strong>$9.95</strong></td></tr>
+<tr><td>10,000 users / month</td><td>10,000 × R × C_run</td><td>$0</td><td><strong>$994.81</strong> before caching or output caps</td></tr>
 </table>
 <p>Demo mode still records unknown tokens. The commercial product is not built. These figures are one homework measurement.</p>
 
 <h3>Cost controls</h3>
 <ul>
-<li><code>MAX_AGENT_CALLS</code> (default 25) stops another completion. This measurement used 13 calls.</li>
-<li><code>MAX_WORKFLOW_COST_USD</code> (default $2.00). This process cost about $0.0049.</li>
+<li><code>MAX_AGENT_CALLS</code> (default 25) stops another completion. This measurement used 14 calls.</li>
+<li><code>MAX_WORKFLOW_COST_USD</code> (default $2.00). The summed CSV cost is $0.004974.</li>
 <li><code>LLM_MODE=demo</code> spends nothing and stores no token counts. <code>INTEGRATION_MODE=simulated</code> keeps email, purchases, and insurers off even when the model is live.</li>
 <li><code>REVIEW_ALL</code> blocks F03 until the checkbox is approved.</li>
 <li>Scores, the portfolio, dinner arithmetic, make-or-buy, the scheduler, and the quality checks do not call the model.</li>
@@ -258,7 +259,7 @@ tests/test_permissions_budget.py::test_review_all_with_approval_continues
 <table>
 <tr><th>Component</th><th>Label</th></tr>
 <tr><td>Priority 0 demo E2E, Blueprint CRUD, Decisions/Work/Attention/Calendar UI</td><td><strong>Operational</strong></td></tr>
-<tr><td>Live model path (smoke, structured output, Priority 0, S01/D01/Q01)</td><td><strong>Operational</strong> — measured Nov 23, 7:28 PM ET; Section 5</td></tr>
+<tr><td>Live model path (smoke, structured output, Priority 0, S01/D01/Q01, office Q01)</td><td><strong>Operational</strong> — 14 calls in <code>audit/LIVE_TOKEN_USAGE.csv</code>; Section 5</td></tr>
 <tr><td>Life Mandate edit, approval, revisions</td><td><strong>Operational</strong></td></tr>
 <tr><td>Deterministic scores, portfolio, dinner periods, make-or-buy</td><td><strong>Operational</strong></td></tr>
 <tr><td>Discovery dataset for the fictional executive</td><td><strong>Simulated</strong> — labeled records, not a live web fetch</td></tr>
