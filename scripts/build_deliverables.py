@@ -195,7 +195,7 @@ def build_slides() -> str:
 
 <section><h2>Problem</h2><p>Ambitions are expansive. Time, money, energy, and attention are finite. Achievement and humanity share one week. The user writes the definition of success.</p></section>
 
-<section><h2>Priority 0 agents</h2>{ARCH_SVG}<p>8 specialist live calls (measured) or labeled demo fixtures.</p></section>
+<section><h2>Priority 0 agents</h2>{ARCH_SVG}<p>Eight Priority 0 specialists, shown as labeled demo fixtures. The live measurement is the 13-call CSV on the OpenAI API.</p></section>
 
 <section><h2>Cost (measured)</h2><p style="font-size:.55em">{cost_line}</p></section>
 

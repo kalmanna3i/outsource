@@ -247,8 +247,8 @@ li{{margin:0.2em 0}}
 <tr><td>Opportunity Stacking</td><td>L01–L06 Life Dimension strategists</td><td>Comparison matrix rows (not researched orgs)</td><td>Hours math: 18 vs 6 hrs/mo → 144 hrs/yr <em>only if comparable benefits</em>; anti–double-count scoring</td><td>Live nonprofit research</td></tr>
 </table>
 <p>Radar, contextual scenarios, and the six stacking strategists were tested in demo mode. They are not in the Section 5 bill. The Life Mandate path did make three live calls (S01, D01, Q01) on a labeled dataset, not a web search. Changing an approved priority order changes the deterministic discretionary pick. The model may choose a different id. That disagreement is shown. The mission text is not rewritten to hide it.</p>
-<h3>Model choice: why <code>gpt-6-luna</code> on the course key</h3>
-<p>Yale MGT 409 restricts the course Portkey key to <strong>gpt-6-luna</strong>. Eight JSON completions cover Priority 0; demo mode spends $0 for grading and module screenshots.</p>
+<h3>Model choice: <code>gpt-6-luna</code> on the OpenAI API</h3>
+<p>The measured run called <code>gpt-6-luna</code> on the OpenAI API, not the course Portkey key. <code>audit/LIVE_TOKEN_USAGE.csv</code> records 13 live calls. Demo mode spends $0 for grading and module screenshots.</p>
 <h3>Step-by-step trace of the captured demo run</h3>
 <p>Workflow <code>{trace['workflow_id']}</code> · final status <code>{trace['final_status']}</code> · agent calls before resume: 7 · after F06: 8.</p>
 <ol>
