@@ -7,6 +7,7 @@ import sqlite3
 from pathlib import Path
 
 from core.config import get_settings
+from core.mandate import LifeMandate, MandateStatus, default_life_mandate, utc_now
 from core.models import Goal, LifeBlueprint, PersonProfile
 
 
@@ -37,6 +38,15 @@ CREATE TABLE IF NOT EXISTS agent_activity (
     call_id TEXT PRIMARY KEY,
     workflow_id TEXT,
     data_json TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS life_mandate (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    data_json TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS life_mandate_revisions (
+    revision INTEGER PRIMARY KEY,
+    data_json TEXT NOT NULL,
+    saved_at TEXT NOT NULL
 );
 """
 
@@ -81,6 +91,7 @@ def init_db(reset: bool = False) -> None:
                 "INSERT INTO settings_kv (key, value) VALUES ('permission_mode', ?)",
                 ("MANAGED_AUTONOMY",),
             )
+        _seed_mandate(conn)
         conn.commit()
 
 
@@ -295,6 +306,91 @@ def get_setting_json(key: str) -> str | None:
     with connect() as conn:
         row = conn.execute("SELECT value FROM settings_kv WHERE key = ?", (key,)).fetchone()
         return row["value"] if row else None
+
+
+def _seed_mandate(conn: sqlite3.Connection) -> None:
+    row = conn.execute("SELECT data_json FROM life_mandate WHERE id = 1").fetchone()
+    if row:
+        return
+    mandate = default_life_mandate()
+    payload = mandate.model_dump_json()
+    conn.execute("INSERT INTO life_mandate (id, data_json) VALUES (1, ?)", (payload,))
+    conn.execute(
+        "INSERT INTO life_mandate_revisions (revision, data_json, saved_at) VALUES (1, ?, ?)",
+        (payload, utc_now().isoformat()),
+    )
+
+
+def load_mandate() -> LifeMandate:
+    init_db()
+    with connect() as conn:
+        row = conn.execute("SELECT data_json FROM life_mandate WHERE id = 1").fetchone()
+        return LifeMandate.model_validate_json(row["data_json"])
+
+
+def list_mandate_revisions() -> list[LifeMandate]:
+    init_db()
+    with connect() as conn:
+        rows = conn.execute(
+            "SELECT data_json FROM life_mandate_revisions ORDER BY revision"
+        ).fetchall()
+        return [LifeMandate.model_validate_json(row["data_json"]) for row in rows]
+
+
+def load_approved_mandate() -> LifeMandate | None:
+    approved = [item for item in list_mandate_revisions() if item.status == MandateStatus.APPROVED]
+    return approved[-1] if approved else None
+
+
+def save_mandate_revision(mandate: LifeMandate) -> LifeMandate:
+    """Append a revision. Does not rewrite older rows."""
+    init_db()
+    with connect() as conn:
+        row = conn.execute("SELECT MAX(revision) AS r FROM life_mandate_revisions").fetchone()
+        nxt = int(row["r"] or 0) + 1
+        mandate.revision = nxt
+        payload = mandate.model_dump_json()
+        conn.execute(
+            "INSERT INTO life_mandate_revisions (revision, data_json, saved_at) VALUES (?, ?, ?)",
+            (nxt, payload, utc_now().isoformat()),
+        )
+        conn.execute(
+            """
+            INSERT INTO life_mandate (id, data_json) VALUES (1, ?)
+            ON CONFLICT(id) DO UPDATE SET data_json = excluded.data_json
+            """,
+            (payload,),
+        )
+        conn.commit()
+    return mandate
+
+
+def save_draft(mandate: LifeMandate) -> LifeMandate:
+    mandate.status = MandateStatus.DRAFT
+    mandate.approved_at = None
+    mandate.approved_by = ""
+    mandate.change_note = mandate.change_note or "Draft saved by user"
+    return save_mandate_revision(mandate)
+
+
+def approve_mandate(mandate: LifeMandate, editor: str) -> LifeMandate:
+    mandate.status = MandateStatus.APPROVED
+    mandate.approved_by = editor or "user"
+    mandate.approved_at = utc_now()
+    mandate.change_note = mandate.change_note or "Approved by user"
+    return save_mandate_revision(mandate)
+
+
+def update_priorities(priorities: list[str], editor: str) -> LifeMandate:
+    """User-approved priority change. Mission text is copied, not rewritten."""
+    base = load_approved_mandate()
+    if base is None:
+        raise ValueError("Approve a mandate before updating priorities.")
+    nxt = base.model_copy(deep=True)
+    nxt.priorities = [item.strip() for item in priorities if item.strip()]
+    nxt.change_note = "User updated priorities"
+    nxt.mission = base.mission
+    return approve_mandate(nxt, editor)
 
 
 def set_setting_json(key: str, value: str) -> None:

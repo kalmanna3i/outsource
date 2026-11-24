@@ -3,7 +3,7 @@
 **Public repo:** https://github.com/kalmanna3i/outsource  
 **Kay Al Mannai · Yale SOM · MGT 409**
 
-> Know what matters. Do what only you can. Delegate the rest.
+> The art of building an intentional life. Every dimension of you. One intentional life.
 
 OUTSOURCE is a multi-agent Streamlit app: read goals → opportunity-cost decisions → AI vs human allocation → execute drafts → hit a simulated insurer identity wall → human brief + ICS → resume after your result.
 
@@ -22,7 +22,7 @@ streamlit run app.py
 
 Open the URL shown (usually http://localhost:8501). Default **`APP_MODE=demo`** — no API key required.
 
-Optional: `cp .env.example .env` and set `APP_MODE=live` plus keys (see below).
+Optional: set `LLM_MODE=live` in the environment. `INTEGRATION_MODE` stays `simulated`, so email, purchases, and insurers do not go live with the model. Keys stay in the parent `.env` (see below). Do not commit a key.
 
 ## API keys (course grading layout)
 
@@ -44,11 +44,13 @@ submissions/
 
 See `.env.example`. Never commit a real `.env`.
 
-If `APP_MODE=live` but no key is present, the UI **falls back to demo** and labels it.
+If `LLM_MODE=live` (or `APP_MODE=live` when `LLM_MODE` is unset) but no key is present, the UI **falls back to demo** and labels it. Sending email or spending money stays off.
 
 ## Priority 0 demo
 
 **Daily Briefing** → use the default request → **Run Priority 0 workflow** → download **ICS** → paste a human result → **Submit result & resume** → check **Agent Activity**.
+
+**Life Mandate** → edit the mission → **Save draft** → **Approve mandate** → change the priority order → **Update priorities**. The discretionary pick changes with the approved order. **Run discovery and recommendation** uses a labeled dataset for a fictional executive, not a live web search. The outreach draft is not sent.
 
 ## Tests
 
@@ -62,4 +64,4 @@ Upload **only** `deliverables/report.html` and `deliverables/slides.html` to Can
 
 ## Honest status
 
-See `BUILD_STATUS.md` — insurer portal and CRM are simulated; Network/Career are planned.
+See `BUILD_STATUS.md`. The insurer, purchases, and email are simulated. Live search and background monitoring are not built. The measured token log is `audit/LIVE_TOKEN_USAGE.csv`.

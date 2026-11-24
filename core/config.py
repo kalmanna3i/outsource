@@ -32,6 +32,8 @@ _load_env()
 
 
 AppMode = Literal["demo", "live"]
+LlmMode = Literal["demo", "live"]
+IntegrationMode = Literal["simulated", "live"]
 
 
 @dataclass(frozen=True)
@@ -46,6 +48,8 @@ class Settings:
     max_agent_calls: int
     max_workflow_cost_usd: float
     data_dir: Path
+    llm_mode: LlmMode = "demo"
+    integration_mode: IntegrationMode = "simulated"
 
     @property
     def has_live_credentials(self) -> bool:
@@ -53,9 +57,20 @@ class Settings:
 
     @property
     def effective_mode(self) -> AppMode:
-        if self.app_mode == "live" and not self.has_live_credentials:
+        """Model path. Independent of email, purchases, and insurers."""
+        if self.llm_mode == "live" and not self.has_live_credentials:
             return "demo"
-        return self.app_mode
+        return self.llm_mode
+
+    @property
+    def external_actions_allowed(self) -> bool:
+        """Email, purchases, and insurer submissions stay off.
+
+        INTEGRATION_MODE is stored so it can differ from LLM_MODE. Only the
+        simulated integration path is implemented. A live flag does not enable
+        sending or spending.
+        """
+        return False
 
     @property
     def api_key(self) -> str | None:
@@ -83,10 +98,20 @@ class Settings:
 def get_settings() -> Settings:
     mode_raw = (os.getenv("APP_MODE") or "demo").strip().lower()
     mode: AppMode = "live" if mode_raw == "live" else "demo"
-    data_dir = APP_ROOT / "data"
+    llm_raw = os.getenv("LLM_MODE")
+    if llm_raw is None or not str(llm_raw).strip():
+        llm_mode: LlmMode = mode
+    else:
+        llm_mode = "live" if str(llm_raw).strip().lower() == "live" else "demo"
+    integration_raw = (os.getenv("INTEGRATION_MODE") or "simulated").strip().lower()
+    integration_mode: IntegrationMode = "live" if integration_raw == "live" else "simulated"
+    data_env = os.getenv("OUTSOURCE_DATA_DIR")
+    data_dir = Path(data_env) if data_env else (APP_ROOT / "data")
     data_dir.mkdir(parents=True, exist_ok=True)
     return Settings(
         app_mode=mode,
+        llm_mode=llm_mode,
+        integration_mode=integration_mode,
         openai_api_key=os.getenv("OPENAI_API_KEY") or None,
         portkey_api_key=os.getenv("PORTKEY_API_KEY") or None,
         openai_base_url=os.getenv("OPENAI_BASE_URL") or None,

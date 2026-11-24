@@ -8,6 +8,7 @@ from typing import Any
 
 from core.config import Settings, get_settings
 from core.models import AgentCallRecord, new_id
+from core.safety import scrub_secrets
 
 
 # Approximate public list prices for reporting when provider returns usage.
@@ -28,9 +29,33 @@ _EST_PRICE_PER_1M = {
 # These models reject any temperature other than the default (400 Unsupported value).
 _DEFAULT_TEMPERATURE_ONLY = ("gpt-6", "gpt-5")
 
+# Not a provider invoice. Lecture 11 short-context rates for gpt-6-luna.
+PRICE_SOURCE = (
+    "Estimate from core/llm.py _EST_PRICE_PER_1M, not a provider invoice. "
+    "gpt-6-luna uses OpenAI Standard short-context prices from MGT 409 Lecture 11: "
+    "input $0.10, cached input $0.01, cache write $0.125, output $0.50 per 1M tokens. "
+    "Other named models use the input/output rates in the same table."
+)
+
 
 class BudgetExceeded(RuntimeError):
     pass
+
+
+def _parse_json_object(content: str) -> dict[str, Any]:
+    """Parse a JSON object. Accept a leading fence if the model adds one."""
+    text = (content or "").strip()
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start < 0 or end <= start:
+            raise
+        parsed = json.loads(text[start : end + 1])
+    if not isinstance(parsed, dict):
+        raise json.JSONDecodeError("Expected a JSON object", text, 0)
+    return parsed
 
 
 class LLMClient:
@@ -101,15 +126,22 @@ class LLMClient:
         system: str,
         user: str,
         demo_payload: dict[str, Any] | None = None,
+        handoff_to: str | None = None,
+        run_id: str | None = None,
     ) -> tuple[dict[str, Any], AgentCallRecord]:
         """Return structured JSON from the model or a labeled demo fixture."""
         self._check_budget()
         mode = self.settings.effective_mode
+        started = time.perf_counter()
         record = AgentCallRecord(
             call_id=new_id("call"),
             agent_id=agent_id,
             role=role,
             mode=mode,
+            model=self.settings.model if mode == "live" else None,
+            tool_calls=0,
+            handoff_to=handoff_to,
+            run_id=run_id,
         )
 
         if mode == "demo":
@@ -119,17 +151,19 @@ class LLMClient:
             if isinstance(payload, dict):
                 payload = {**payload, "_demo_labeled": True}
             record.finished_at = record.started_at
+            record.duration_ms = round((time.perf_counter() - started) * 1000, 1)
             record.input_tokens = None
             record.output_tokens = None
             record.cost_usd = None
             record.cost_known = False
+            record.price_source = None
             record.summary = f"[DEMO FIXTURE] {role}: structured output (not a live model call)."
             record.success = True
             self.call_count += 1
             self.records.append(record)
             return payload, record
 
-        # LIVE mode — real API call
+        # LIVE mode — real API call. Integrations stay simulated elsewhere.
         client = self._ensure_client()
         if client is None:
             # Should not happen if effective_mode is live
@@ -154,7 +188,7 @@ class LLMClient:
                 ),
             )
             content = response.choices[0].message.content or "{}"
-            payload = json.loads(content)
+            payload = _parse_json_object(content)
             usage = getattr(response, "usage", None)
             in_tok = getattr(usage, "prompt_tokens", None) if usage else None
             out_tok = getattr(usage, "completion_tokens", None) if usage else None
@@ -173,6 +207,10 @@ class LLMClient:
             record.cache_write_tokens = written
             record.cost_usd = cost
             record.cost_known = known
+            record.price_source = PRICE_SOURCE if known else (
+                f"No price row for model {self.settings.model!r} in _EST_PRICE_PER_1M; cost left unknown."
+            )
+            record.duration_ms = round((time.perf_counter() - started) * 1000, 1)
             if cost:
                 self.total_cost_usd += cost
             record.summary = f"[LIVE] {role} model call succeeded."
@@ -182,8 +220,9 @@ class LLMClient:
             record.finished_at = datetime.utcnow()
         except Exception as exc:  # noqa: BLE001 — surface as agent failure
             record.success = False
-            record.error = str(exc)
-            record.summary = f"[LIVE] {role} failed: {exc}"
+            record.duration_ms = round((time.perf_counter() - started) * 1000, 1)
+            record.error = scrub_secrets(str(exc))
+            record.summary = scrub_secrets(f"[LIVE] {role} failed: {exc}")
             from datetime import datetime
 
             record.finished_at = datetime.utcnow()

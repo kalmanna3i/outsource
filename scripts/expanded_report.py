@@ -71,6 +71,66 @@ AGENT_TABLE_ROWS = """
 """
 
 
+def build_tokenomics_html() -> str:
+    """Section 5 from audit/LIVE_TOKEN_USAGE.csv. Numbers are sums, not a second estimate."""
+    import csv
+
+    path = Path(__file__).resolve().parent.parent / "audit" / "LIVE_TOKEN_USAGE.csv"
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+
+    def num(row: dict[str, str], key: str) -> float:
+        raw = (row.get(key) or "").strip()
+        return float(raw) if raw else 0.0
+
+    input_tokens = int(sum(num(row, "input_tokens") for row in rows))
+    cached = int(sum(num(row, "cached_input_tokens") for row in rows))
+    cache_write = int(sum(num(row, "cache_write_tokens") for row in rows))
+    output_tokens = int(sum(num(row, "output_tokens") for row in rows))
+    cost = sum(num(row, "cost_usd") for row in rows)
+    naive = (input_tokens / 1_000_000) * 0.10 + (output_tokens / 1_000_000) * 0.50
+    body = []
+    for row in rows:
+        body.append(
+            "<tr><td>{agent} {name}</td><td>{inn}</td><td>{cached}</td><td>{written}</td>"
+            "<td>{out}</td><td>${cost:.6f}</td><td>{ms}</td></tr>".format(
+                agent=html.escape(row["agent_id"]),
+                name=html.escape(row["agent_name"]),
+                inn=int(num(row, "input_tokens")),
+                cached=int(num(row, "cached_input_tokens")),
+                written=int(num(row, "cache_write_tokens")),
+                out=int(num(row, "output_tokens")),
+                cost=num(row, "cost_usd"),
+                ms=html.escape(row.get("duration_ms") or ""),
+            )
+        )
+    per_user = 20 * cost
+    return f"""
+<p>The numbers in this section are the sum of <code>audit/LIVE_TOKEN_USAGE.csv</code> from one live process on Nov 23, 2026 at 7:28 PM ET. The model was <code>gpt-6-luna</code> on the OpenAI API. <code>LLM_MODE=live</code> and <code>INTEGRATION_MODE=simulated</code>: email, purchases, and the insurer stayed simulated. The course Portkey route was not used for this measurement. Cached input tokens were {cached}. Cache-write tokens were {cache_write}, all on A02, and those tokens are already inside the input count. They are priced at $0.125 per 1M instead of $0.10, which is why the summed row cost differs from a plain input-plus-output product.</p>
+<p>Plain product with zero cache-write: ${naive:.6f}. Sum of the row costs in the CSV: <strong>${cost:.6f}</strong>. Wall clock for the whole process: <strong>83.8 s</strong>. Model tool calls: <strong>0</strong>. The insurer step is simulated Python, not a tool call.</p>
+<table>
+<tr><th>Call</th><th>Input</th><th>Cached</th><th>Cache write</th><th>Output</th><th>Cost</th><th>ms</th></tr>
+{''.join(body)}
+<tr><td><strong>Total ({len(rows)} live calls)</strong></td><td><strong>{input_tokens}</strong></td><td><strong>{cached}</strong></td><td><strong>{cache_write}</strong></td><td><strong>{output_tokens}</strong></td><td><strong>${cost:.6f}</strong></td><td>83.8 s wall</td></tr>
+</table>
+<p>Runs inside that file: a smoke JSON call, one structured-output call, Priority 0 workflow <code>wf_1fb3c7f55ef2</code> through resume (A01, A02, B01, F02, F03, F05, F04, F06), and discovery S01 → D01 → Q01. The deterministic rank for the fictional executive chose <code>infra-nonprofit</code>. The model chose <code>home-dinner</code>, which is a real id in the labeled dataset. Both are kept. The mission was not rewritten to force them to agree. Radar R01–R08, contextual C01–C02, and stacking L01–L06 were not in this live bill.</p>
+<h3>Definitions</h3>
+<ul>
+<li><strong>R</strong> = 20 workflows per user per month. That is an assumption, not a measured rate.</li>
+<li><strong>C_run</strong> = ${cost:.6f}, the summed CSV cost, not a rounded slogan.</li>
+<li>Price source: <code>core/llm.py</code> <code>_EST_PRICE_PER_1M</code>. gpt-6-luna rates are OpenAI Standard short-context prices from MGT 409 Lecture 11: input $0.10, cached input $0.01, cache write $0.125, output $0.50 per 1M. This is not a provider invoice.</li>
+</ul>
+<table>
+<tr><th>Scale</th><th>Formula</th><th>Demo</th><th>Live, using this CSV and R = 20</th></tr>
+<tr><td>One measured process</td><td>C_run</td><td>$0</td><td><strong>${cost:.6f}</strong></td></tr>
+<tr><td>Per user / month</td><td>R × C_run</td><td>$0</td><td><strong>${per_user:.4f}</strong></td></tr>
+<tr><td>100 users / month</td><td>100 × R × C_run</td><td>$0</td><td><strong>${100 * per_user:.2f}</strong></td></tr>
+<tr><td>10,000 users / month</td><td>10,000 × R × C_run</td><td>$0</td><td><strong>${10000 * per_user:.2f}</strong> before caching or output caps</td></tr>
+</table>
+<p>Demo mode still records unknown tokens. The commercial product is not built. These figures are one homework measurement.</p>
+"""
+
+
 def render_expanded_report(
     *,
     repo: str,
@@ -111,6 +171,7 @@ def render_expanded_report(
     calls_esc = html.escape(
         json.dumps([{"agent_id": c["agent_id"], "role": c["role"], "mode": c["mode"]} for c in trace["agent_calls"]], indent=2)
     )
+    token_html = build_tokenomics_html()
 
     return f"""<!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"/>
@@ -142,7 +203,7 @@ li{{margin:0.2em 0}}
 
 <h2>1. Title + links</h2>
 <p><strong>Kay Al Mannai</strong> · Yale School of Management · MGT 409 AI Foundations for Managers · November 23, 2026 (America/New_York).</p>
-<p><strong>Public repo:</strong> <a href="{repo}">{repo}</a> · clone branch <strong>main</strong> · <strong>55 tests</strong> pass under <code>APP_MODE=demo</code>.</p>
+<p><strong>Public repo:</strong> <a href="{repo}">{repo}</a> · clone branch <strong>main</strong> · <strong>68 tests</strong> pass under <code>APP_MODE=demo</code>.</p>
 <p><strong>Application:</strong> run locally — <code>streamlit run app.py</code> (no production hosting in this submission).</p>
 <p>OUTSOURCE is a Personal Strategy &amp; Execution Office: Priority 0 compares opportunity costs and prepares human handoffs; extension modules add <strong>Strategic Radar</strong> (mission-aligned discovery), <strong>Contextual Opportunities</strong> (travel-window bundling), and <strong>Opportunity Stacking</strong> (multidimensional life commitments). All extension UI paths in this submission ran in <strong>demo mode</strong> with labeled fixtures unless noted as deterministic code.</p>
 <p class="small">Priority 0 screenshots are from a demo-mode run on the build machine ({trace['mode']} mode). Module screenshots are from labeled SIMULATED_FIXTURE flows on branch main.</p>
@@ -152,6 +213,7 @@ li{{margin:0.2em 0}}
 <p><strong>Maya Chen</strong> is a <em>fictional</em> second-year MBA executive: she leads a small product team during the day, carries a 4.0 credit load, and is responsible for family logistics. On submission nights she faces four simultaneous pulls: a course final due at 11:59 PM Eastern, a close friend’s wedding with a fixed ceremony window, a stakeholder expecting a work status note, and an insurance claim stuck behind an identity-verification gate. Maya is competent; her bottleneck is not lack of intelligence but <strong>attention fragmentation</strong> and tools that optimize the wrong objective.</p>
 <h3>Today’s manual workflow (typical)</h3>
 <p>Maya scatters the evening across a notes app, a general chat tab, email drafts, and an insurer portal—often <strong>fifteen or more</strong> context switches—with no persisted tradeoffs, no calendar brief separation, and frequent false completion (“the bot checked the claim”). OUTSOURCE compresses preparation into one intake, one ranked plan, AI-only drafts where honest, and one resumable human gate for identity verification.</p>
+<p>The same constraint shows up beyond one deadline night. Ambitions are expansive, and time, money, energy, and attention are finite. Achievement and humanity have to fit in the same week. A second fictional person, Amina Okonkwo, is an MBA student at an infrastructure company who also has a dog, a home, a recovery evening she stated herself, a philanthropic interest, and a trip she cannot honestly take during deadline week. The Life Mandate stores her mission and her sentence about success. The software does not invent that sentence, and it does not fill every hour.</p>
 
 <h2>3. What is new here</h2>
 <p>Competition is real. Lindy, Motion, Reclaim, Duckbill, and OpenAI’s agent experiences all help individuals offload work. OUTSOURCE does not claim a green-field market; it occupies a narrower wedge: <strong>goal-weighted opportunity cost</strong>, <strong>explicit AI/HUMAN allocation</strong>, and a <strong>handoff contract</strong> that stops at identity walls instead of faking success. The table below lists only features this repository actually implements (verifiable in code/UI) versus publicly known positioning of named products—without asserting their internal architectures.</p>
@@ -184,7 +246,7 @@ li{{margin:0.2em 0}}
 <tr><td>Contextual Opportunities</td><td>C01–C02</td><td>ORD/Boston scenario fixtures</td><td>Layover feasibility math; Boston bundle +$210 / +35 min vs original itinerary</td><td>Live travel APIs</td></tr>
 <tr><td>Opportunity Stacking</td><td>L01–L06 Life Dimension strategists</td><td>Comparison matrix rows (not researched orgs)</td><td>Hours math: 18 vs 6 hrs/mo → 144 hrs/yr <em>only if comparable benefits</em>; anti–double-count scoring</td><td>Live nonprofit research</td></tr>
 </table>
-<p>These modules were <strong>not</strong> included in the measured live token run in Section 5; they were tested in <code>APP_MODE=demo</code> with fixtures.</p>
+<p>Radar, contextual scenarios, and the six stacking strategists were tested in demo mode. They are not in the Section 5 bill. The Life Mandate path did make three live calls (S01, D01, Q01) on a labeled dataset, not a web search. Changing an approved priority order changes the deterministic discretionary pick. The model may choose a different id. That disagreement is shown. The mission text is not rewritten to hide it.</p>
 <h3>Model choice: why <code>gpt-6-luna</code> on the course key</h3>
 <p>Yale MGT 409 restricts the course Portkey key to <strong>gpt-6-luna</strong>. Eight JSON completions cover Priority 0; demo mode spends $0 for grading and module screenshots.</p>
 <h3>Step-by-step trace of the captured demo run</h3>
@@ -211,46 +273,14 @@ li{{margin:0.2em 0}}
 {img("agent_activity","Figure 7 — Agent Activity: per-call mode and summaries")}
 
 <h2>5. Tokenomics</h2>
-<p>All numbers below are <strong>measured</strong> from one live Priority 0 run on Nov 23, 2026 (5:37 PM ET), including the resume after the human intervention. The run used <code>gpt-6-luna</code> called <strong>directly on the OpenAI API with Kay&#39;s personal OpenAI key</strong> (<code>APP_MODE=live</code>). The course Portkey key was rejected with HTTP 401 (&ldquo;Invalid API Key&rdquo;, code 03), so the course route could not be used. Token counts come from each response&#39;s <code>usage</code> object. Cost uses OpenAI Standard prices for gpt-6-luna per 1M tokens: input $0.10, cached input $0.01, cache write $0.125, output $0.50 (the same as Lecture 11).</p>
-<h3>Measured run (workflow wf_f56cc5c696df, status COMPLETED)</h3>
-<table>
-<tr><th>Agent call</th><th>Input tokens</th><th>Cached input</th><th>Output tokens</th><th>Cost (USD)</th></tr>
-<tr><td>A01 Chief of Staff</td><td>152</td><td>0</td><td>757</td><td>$0.000394</td></tr>
-<tr><td>A02 Life Strategy Architect</td><td>1,005</td><td>0</td><td>990</td><td>$0.000596</td></tr>
-<tr><td>B01 Opportunity Cost Economist</td><td>877</td><td>0</td><td>1,220</td><td>$0.000698</td></tr>
-<tr><td>F02 Task Decomposition and Delegation</td><td>890</td><td>0</td><td>842</td><td>$0.000510</td></tr>
-<tr><td>F03 Autonomous Execution</td><td>196</td><td>0</td><td>177</td><td>$0.000108</td></tr>
-<tr><td>F05 Human Intervention and Handoff</td><td>138</td><td>0</td><td>355</td><td>$0.000191</td></tr>
-<tr><td>F04 Calendar and Logistics</td><td>125</td><td>0</td><td>422</td><td>$0.000224</td></tr>
-<tr><td>F06 Follow-Up and Accountability</td><td>900</td><td>0</td><td>624</td><td>$0.000402</td></tr>
-<tr><td><strong>Total (8 live calls)</strong></td><td><strong>4,283</strong></td><td><strong>0</strong></td><td><strong>5,387</strong></td><td><strong>$0.003122</strong></td></tr>
-</table>
-<p>Wall time: <strong>49.1 s</strong> end to end. That is 42.9 s for the seven calls up to the human barrier (A01&ndash;F04) and 6.2 s for F06 after the verification result was entered. It excludes the human&#39;s own time on the insurer call.</p>
-<p class="callout"><strong>No new live measurements</strong> were taken for Strategic Radar, Contextual Opportunities, or Opportunity Stacking. Those modules appear in the UI and tests in <code>demo</code> mode only; token and cost figures in this section remain Priority 0 only.</p>
-{live_figure()}
-<h3>Definitions</h3>
+{token_html}
+<h3>Cost controls</h3>
 <ul>
-<li><strong>R</strong> = Priority 0 workflows per user per month. Assumption: <strong>R = 20</strong> (about one per weekday).</li>
-<li><strong>T_in, T_cached, T_out</strong> = tokens per workflow from provider usage (measured above: 4,283 / 0 / 5,387).</li>
-<li><strong>P_in, P_cached, P_out</strong> = price per 1M tokens ($0.10, $0.01, $0.50 for <code>gpt-6-luna</code>; this table is in <code>core/llm.py</code>).</li>
-<li><strong>C_run</strong> = ((T_in &minus; T_cached)/10⁶)&middot;P_in + (T_cached/10⁶)&middot;P_cached + (T_out/10⁶)&middot;P_out.</li>
-</ul>
-<table>
-<tr><th>Scale</th><th>Formula</th><th>Demo (grading mode)</th><th>Live (from measured run, R = 20)</th></tr>
-<tr><td>One run</td><td>C_run</td><td>$0 (fixtures, no tokens)</td><td><strong>$0.00312</strong></td></tr>
-<tr><td>Per user / month</td><td>R &times; C_run</td><td>$0</td><td><strong>$0.0624</strong></td></tr>
-<tr><td>100 users / month</td><td>100 &times; R &times; C_run</td><td>$0</td><td><strong>$6.24</strong></td></tr>
-<tr><td>10,000 users / month</td><td>10,000 &times; R &times; C_run</td><td>$0</td><td><strong>$624.36</strong> before batching, output caps or caching</td></tr>
-</table>
-<h3>What drives the cost</h3>
-<p>Output tokens are <strong>86%</strong> of the bill because gpt-6-luna output is priced 5&times; input; cached input was <strong>0</strong> on this run. A02 and B01 are the largest share. Extension modules did not add live spend.</p>
-<h3>Cost controls and tradeoffs</h3>
-<ul>
-<li><code>MAX_AGENT_CALLS</code> (default 25) &mdash; hard stop before another completion; prevents runaway loops; may truncate unfinished workflows if set too low (tested at 3).</li>
-<li><code>MAX_WORKFLOW_COST_USD</code> (default 2.00) &mdash; accumulates live spend from usage &times; the price table; the measured run used $0.0031, about 0.16% of the cap.</li>
-<li><code>APP_MODE=demo</code> &mdash; zero spend for grading and screenshots; tradeoff: demo runs show no token counts, which is why the figures above come from a separate live pass.</li>
-<li><code>REVIEW_ALL</code> permission &mdash; blocks F03 until checkbox approval; saves tokens but requires extra UI click (operational in tests).</li>
-<li><strong>Deterministic engines</strong> &mdash; insurer check, scheduler, ICS export, finance projection, radar/contextual/stacking math, safety regex scan&mdash;run without LLM spend in their operational paths.</li>
+<li><code>MAX_AGENT_CALLS</code> (default 25) stops another completion. This measurement used 13 calls.</li>
+<li><code>MAX_WORKFLOW_COST_USD</code> (default $2.00). This process cost about $0.0049.</li>
+<li><code>LLM_MODE=demo</code> spends nothing and stores no token counts. <code>INTEGRATION_MODE=simulated</code> keeps email, purchases, and insurers off even when the model is live.</li>
+<li><code>REVIEW_ALL</code> blocks F03 until the checkbox is approved.</li>
+<li>Scores, the portfolio, dinner arithmetic, make-or-buy, the scheduler, and the quality checks do not call the model.</li>
 </ul>
 
 <h2>6. Safety</h2>
@@ -296,7 +326,11 @@ li{{margin:0.2em 0}}
 <table>
 <tr><th>Component</th><th>Label</th></tr>
 <tr><td>Priority 0 demo E2E, Blueprint CRUD, Decisions/Work/Attention/Calendar UI</td><td><strong>Operational</strong></td></tr>
-<tr><td>Live eight-call path with measured tokens (Priority 0 only)</td><td><strong>Operational</strong> (Nov 23; Section 5)</td></tr>
+<tr><td>Live model path (smoke, structured output, Priority 0, S01/D01/Q01)</td><td><strong>Operational</strong> — measured Nov 23, 7:28 PM ET; Section 5</td></tr>
+<tr><td>Life Mandate edit, approval, revisions</td><td><strong>Operational</strong></td></tr>
+<tr><td>Deterministic scores, portfolio, dinner periods, make-or-buy</td><td><strong>Operational</strong></td></tr>
+<tr><td>Discovery dataset for the fictional executive</td><td><strong>Simulated</strong> — labeled records, not a live web fetch</td></tr>
+<tr><td>Email, purchases, insurer submission</td><td><strong>Simulated</strong> — off even if INTEGRATION_MODE is set live</td></tr>
 <tr><td>Strategic Radar discovery feed &amp; illustrative graph</td><td><strong>Simulated</strong></td></tr>
 <tr><td>Strategic Radar research-to-action (draft not sent, ICS, brief)</td><td><strong>Operational</strong></td></tr>
 <tr><td>Strategic Radar background monitoring</td><td><strong>Planned</strong></td></tr>
@@ -309,7 +343,7 @@ li{{margin:0.2em 0}}
 <tr><td>My Career module, CUSTOM_AUTONOMY allowlist</td><td><strong>Planned</strong></td></tr>
 </table>
 <h3>What teaching staff should expect when grading</h3>
-<p>Clone <a href="{repo}">{repo}</a> (branch <strong>main</strong>), run <code>APP_MODE=demo streamlit run app.py</code>, and walk Priority 0 plus sidebar entries Strategic Radar, Contextual Opportunities, and Opportunity Stacking. Agent Activity after Priority 0 shows eight demo calls with UNKNOWN cost. Live tokens were measured once for Priority 0 only (Section 5). Staff should not expect sent email, live insurer APIs, or a running radar scheduler.</p>
+<p>Clone <a href="{repo}">{repo}</a> (branch <strong>main</strong>), run <code>APP_MODE=demo streamlit run app.py</code>, and walk Daily Briefing, Life Mandate, Strategic Radar, Contextual Opportunities, and Opportunity Stacking. Demo Agent Activity shows UNKNOWN cost. The live token log is <code>audit/LIVE_TOKEN_USAGE.csv</code>. Staff should not expect sent email, a live insurer, a web search, or a running radar scheduler. Background monitoring, a full cabinet, and live purchases are <strong>Planned</strong> and were not built.</p>
 <h3>One-month roadmap (if continued)</h3>
 <ol>
 <li>Cap per-agent output and re-measure Priority 0 live cost.</li>

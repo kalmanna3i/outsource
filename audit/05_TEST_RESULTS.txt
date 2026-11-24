@@ -1,0 +1,44 @@
+.......................................................                  [100%]
+=============================== warnings summary ===============================
+tests/test_contextual_schema.py: 6 warnings
+tests/test_intervention_fields.py: 13 warnings
+tests/test_permissions_budget.py: 22 warnings
+tests/test_stacking_agents.py: 6 warnings
+tests/test_strategic_radar.py: 104 warnings
+tests/test_workflow_demo.py: 13 warnings
+  /Users/kalmannai/Desktop/AI/outsource/.venv/lib/python3.14/site-packages/pydantic/main.py:280: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+
+tests/test_intervention_fields.py: 7 warnings
+tests/test_permissions_budget.py: 8 warnings
+tests/test_workflow_demo.py: 7 warnings
+  /Users/kalmannai/Desktop/AI/outsource/core/models.py:187: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    "at": datetime.utcnow().isoformat() + "Z",
+
+tests/test_intervention_fields.py: 7 warnings
+tests/test_permissions_budget.py: 8 warnings
+tests/test_workflow_demo.py: 7 warnings
+  /Users/kalmannai/Desktop/AI/outsource/core/models.py:192: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    self.updated_at = datetime.utcnow()
+
+tests/test_intervention_fields.py::test_intervention_has_required_fields_and_resumes
+tests/test_permissions_budget.py::test_review_all_with_approval_continues
+tests/test_workflow_demo.py::test_priority0_demo_e2e
+  /Users/kalmannai/Desktop/AI/outsource/services/insurer.py:37: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    retrieved_at=datetime.utcnow(),
+
+tests/test_strategic_radar.py: 66 warnings
+  /Users/kalmannai/Desktop/AI/outsource/.venv/lib/python3.14/site-packages/pydantic/main.py:792: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    return cls.__pydantic_validator__.validate_python(
+
+tests/test_strategic_radar.py::test_discovery_records_are_complete_and_labeled
+tests/test_strategic_radar.py::test_dedup_merges_duplicates_and_keeps_provenance
+tests/test_strategic_radar.py::test_rediscovery_marks_nothing_new
+tests/test_strategic_radar.py::test_rediscovery_marks_nothing_new
+tests/test_strategic_radar.py::test_auditor_flags_distractions_and_conflicts
+tests/test_strategic_radar.py::test_research_to_action_produces_ics_draft_followup_and_sends_nothing
+  /Users/kalmannai/Desktop/AI/outsource/services/radar.py:307: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    now_iso = datetime.utcnow().isoformat() + "Z"
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+55 passed, 283 warnings in 5.35s

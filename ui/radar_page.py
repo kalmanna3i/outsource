@@ -86,8 +86,10 @@ def render_radar() -> None:
             _run_discovery()
     run: DiscoveryRun | None = st.session_state.get("radar_run")
     if run is None:
-        _run_discovery()
-        run = st.session_state.radar_run
+        st.info(
+            "No discovery run yet. Use Run discovery now. Opening this page does not write the database."
+        )
+        return
 
     c1, c2, c3, c4 = st.columns(4)
     for col, label, val in (

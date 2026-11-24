@@ -127,6 +127,10 @@ div[data-testid="stSidebarNav"] { display: none; }
 
 MODULE_STATUS = {
     "Daily Briefing": ("Operational", "status-op"),
+    "Life Mandate": (
+        "Operational mandate · discovery dataset Simulated · scores Operational",
+        "status-op",
+    ),
     "My Life Blueprint": ("Operational", "status-op"),
     "My Decisions": ("Operational", "status-op"),
     "My Work": ("Operational", "status-op"),

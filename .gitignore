@@ -9,6 +9,7 @@ __pycache__/
 .streamlit/secrets.toml
 data/*.db
 data/*.db-journal
+audit/_live_work/
 *.ics
 deliverables/screenshots/*.png
 deliverables/screenshots/manifest.b64.json

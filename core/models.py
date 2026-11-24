@@ -159,6 +159,12 @@ class AgentCallRecord(BaseModel):
     summary: str = ""
     success: bool = True
     error: str | None = None
+    model: str | None = None
+    duration_ms: float | None = None
+    tool_calls: int = 0
+    handoff_to: str | None = None
+    price_source: str | None = None
+    run_id: str | None = None
 
 
 class WorkflowState(BaseModel):

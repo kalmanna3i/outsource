@@ -1,7 +1,7 @@
 # OUTSOURCE — Demo Script (Priority 0)
 
 **Presenter:** Kay Al Mannai · **Course:** MGT 409 · **Runtime:** ~3–5 minutes  
-**Mode:** Start with `APP_MODE=demo` so every fixture is labeled. Optionally repeat once in `live` if a key is configured.
+**Mode:** Start with `APP_MODE=demo` and `LLM_MODE=demo` so every fixture is labeled. Email, purchases, and the insurer stay simulated even if you later set `LLM_MODE=live`.
 
 ## Setup
 
@@ -40,8 +40,11 @@ Confirm the header pill shows **MODE: DEMO**.
 7. **Safety (20s)**  
    **Settings** → paste *Ignore previous instructions… api_key=sk-…* → show quarantine banner + `[REDACTED]`.
 
-8. **Honesty close (15s)**  
-   “Demo mode never pretends fixtures are live calls. Email, purchases, and real insurer APIs are not implemented. See BUILD_STATUS.md.”
+8. **Life Mandate (40s)**  
+   Open **Life Mandate**. The philosophy line is “The art of building an intentional life.” Edit the mission, **Save draft**, then **Approve mandate**. Change priorities to a single line, `infrastructure`, and click **Update priorities**. The discretionary pick becomes the site seminar. Say that success is the user’s sentence. **Run discovery and recommendation** uses a labeled dataset. The outreach card says `DRAFT_NOT_SENT`.
+
+9. **Honesty close (15s)**  
+   “Demo mode never pretends fixtures are live calls. Email, purchases, and real insurer APIs are not implemented. Live search and background monitoring are not built. See BUILD_STATUS.md.”
 
 ## Pass criteria
 
@@ -52,3 +55,5 @@ Confirm the header pill shows **MODE: DEMO**.
 - [ ] ICS downloadable; sensitive details only in private brief  
 - [ ] Resume after user result  
 - [ ] Mode clearly labeled  
+- [ ] Approved priority change moves the discretionary pick  
+- [ ] Outreach stays DRAFT_NOT_SENT  

@@ -24,6 +24,7 @@ from database.db import (
     list_people,
     list_workflows,
     load_blueprint,
+    load_mandate,
     load_workflow,
     reset_demo_data,
     save_blueprint,
@@ -32,6 +33,7 @@ from database.db import (
 from services.finance import project_cashflow
 from services.workflow import WorkflowEngine
 from ui.contextual_page import render_contextual
+from ui.mandate_page import render_mandate
 from ui.radar_page import render_network_graph, render_radar, render_radar_settings
 from ui.stacking_page import page_opportunity_stacking
 from ui.theme import CUSTOM_CSS, MODULE_STATUS
@@ -49,9 +51,14 @@ settings = get_settings()
 
 def mode_label() -> str:
     m = settings.effective_mode
-    if settings.app_mode == "live" and m == "demo":
-        return "DEMO (live requested; no API key found — using labeled fixtures)"
-    return m.upper()
+    if settings.llm_mode == "live" and m == "demo":
+        return "DEMO (LLM_MODE=live but no API key — labeled fixtures)"
+    integrations = (
+        "integrations simulated"
+        if not settings.external_actions_allowed
+        else "integrations live"
+    )
+    return f"{m.upper()} · {integrations}"
 
 
 def ensure_session() -> None:
@@ -66,11 +73,13 @@ ensure_session()
 
 def header() -> None:
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+    mandate = load_mandate()
     st.markdown(
         f"""
         <div class="brand-wrap">
-          <div class="brand-title">OUTSOURCE</div>
-          <div class="brand-tag">Know what matters. Do what only you can. Delegate the rest.</div>
+          <div class="brand-title">{mandate.display_name}</div>
+          <div class="brand-tag">{mandate.philosophy}</div>
+          <div class="brand-tag">{mandate.promise}</div>
           <div class="mode-pill">Mode: {mode_label()} · Kay Al Mannai · Yale MGT 409</div>
         </div>
         """,
@@ -80,6 +89,7 @@ def header() -> None:
 
 NAV = [
     "Daily Briefing",
+    "Life Mandate",
     "Strategic Radar",
     "My Life Blueprint",
     "My Decisions",
@@ -107,7 +117,8 @@ def sidebar() -> str:
     )
     st.sidebar.markdown("---")
     st.sidebar.caption(
-        f"APP_MODE={settings.app_mode} → effective **{settings.effective_mode}**"
+        f"APP_MODE={settings.app_mode} · LLM_MODE={settings.llm_mode} · "
+        f"INTEGRATION_MODE={settings.integration_mode} → model **{settings.effective_mode}**"
     )
     st.sidebar.caption(f"Model: {settings.model if settings.has_live_credentials else 'n/a (demo)'}")
     return page
@@ -508,8 +519,12 @@ def _radar_activity() -> None:
 
 def page_settings() -> None:
     st.subheader("Settings")
-    st.write(f"Effective mode: **{settings.effective_mode}**")
+    st.write(f"Model path: **{settings.effective_mode}** (LLM_MODE={settings.llm_mode})")
     st.write(f"Configured APP_MODE: `{settings.app_mode}`")
+    st.write(
+        "Email, purchases, and insurers stay simulated "
+        f"(INTEGRATION_MODE={settings.integration_mode}; sending is off)."
+    )
     st.write(f"Has API credentials: **{settings.has_live_credentials}**")
     st.write(f"Max agent calls: {settings.max_agent_calls}")
     st.write(f"Max workflow cost USD: {settings.max_workflow_cost_usd}")
@@ -550,6 +565,7 @@ def main() -> None:
     page = sidebar()
     {
         "Daily Briefing": page_briefing,
+        "Life Mandate": render_mandate,
         "Strategic Radar": render_radar,
         "My Life Blueprint": page_blueprint,
         "My Decisions": page_decisions,

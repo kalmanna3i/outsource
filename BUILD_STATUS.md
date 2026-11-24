@@ -3,17 +3,21 @@
 **Public repo:** https://github.com/kalmanna3i/outsource  
 **Kay Al Mannai · MGT 409 · Nov 23, 2026**
 
-**Tests:** `APP_MODE=demo pytest -q tests/` → **55 passed** (Priority 0 + Contextual + Strategic Radar + Opportunity Stacking)  
-**Demo:** Priority 0 E2E verified (demo fixtures + UI screenshots embedded in `deliverables/report.html` / `slides.html`)  
-**Opportunity Stacking:** **Simulated integration** — illustrative matrix, deterministic hours, Chief of Staff bundle pick, six Life Dimension strategists (L01–L06, demo fixtures; live wired like Priority 0).  
-**Live tokens:** **Measured** Nov 23 (5:37 PM ET): one live run + resume on gpt-6-luna via OpenAI directly (course Portkey key returned 401 on that path). 8 calls · 4,283 input / 0 cached / 5,387 output tokens · $0.003122 · 49.1 s. See Report §5 and the Cost slide.
+**Tests:** `APP_MODE=demo LLM_MODE=demo pytest -q tests/` → **68 passed**  
+**Live tokens:** **Measured** Nov 23, 2026, 7:28 PM ET. `gpt-6-luna` on the OpenAI API. `LLM_MODE=live`, `INTEGRATION_MODE=simulated`. 13 calls · 5,487 input / 0 cached / 1,058 cache-write / 8,712 output · **$0.004931** summed from `audit/LIVE_TOKEN_USAGE.csv` · 83.8 s. Not a provider invoice. See Report §5.  
+**Model vs score:** deterministic rank chose `infra-nonprofit`. The model chose `home-dinner`. Both are recorded. The mission was not rewritten.
 
 | Area | Status |
 |------|--------|
 | Priority 0 workflow (demo) | **Operational** |
+| Life Mandate (edit, approve, revisions, priority change) | **Operational** |
+| Deterministic scores, portfolio, dinner periods, make-or-buy | **Operational** |
+| Personal discovery S01 and quality auditor Q01 | **Operational** (live path measured; user can reject the note) |
+| Discovery dataset for the fictional executive | **Simulated** (labeled records; model chooses an id; not live web) |
+| Email, purchases, insurer submission | **Simulated** (stay off when the model is live) |
 | Opportunity Stacking module | **Simulated** (fixtures + deterministic optimizer) |
 | Life Dimension agents L01–L06 | **Simulated** (demo fixtures; live one-call each if API key) |
-| Live multi-agent calls | **Operational** (one measured live run, Nov 23) |
+| Live multi-agent calls | **Operational** (measured Nov 23, 7:28 PM ET; 13 calls) |
 | Insurer portal | **Simulated** |
 | People CRM | **Simulated** |
 | Finance projection | **Simulated** (deterministic) |

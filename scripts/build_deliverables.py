@@ -147,7 +147,32 @@ def build_report() -> str:
     )
 
 
+def _cost_line() -> str:
+    import csv
+
+    path = ROOT / "audit" / "LIVE_TOKEN_USAGE.csv"
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+
+    def num(row: dict[str, str], key: str) -> float:
+        raw = (row.get(key) or "").strip()
+        return float(raw) if raw else 0.0
+
+    cost = sum(num(row, "cost_usd") for row in rows)
+    inn = int(sum(num(row, "input_tokens") for row in rows))
+    cached = int(sum(num(row, "cached_input_tokens") for row in rows))
+    written = int(sum(num(row, "cache_write_tokens") for row in rows))
+    out = int(sum(num(row, "output_tokens") for row in rows))
+    return (
+        f"Nov 23, 7:28 PM ET · gpt-6-luna · LLM_MODE=live · integrations simulated · "
+        f"{len(rows)} calls · {inn} input / {cached} cached / {written} cache-write / {out} output · "
+        f"${cost:.6f} from audit/LIVE_TOKEN_USAGE.csv · not a provider invoice. "
+        "Radar, contextual, and L01–L06 were not in this bill."
+    )
+
+
 def build_slides() -> str:
+    cost_line = _cost_line()
     modules = load_module_images()
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"/><title>OUTSOURCE Slides</title>
@@ -165,14 +190,14 @@ def build_slides() -> str:
 <h1>OUTSOURCE</h1>
 <p>Kay Al Mannai · MGT 409 · branch <strong>main</strong></p>
 <p><a href="{REPO}">{REPO}</a></p>
-<p class="fragment">Priority 0 + Strategic Radar + Contextual + Stacking · 55 tests (demo)</p>
+<p class="fragment">The art of building an intentional life. 68 demo tests.</p>
 </section>
 
-<section><h2>Problem</h2><p>One evening: MBA deadline · wedding · work · insurance identity wall — goal-aware opportunity cost, not generic automation.</p></section>
+<section><h2>Problem</h2><p>Ambitions are expansive. Time, money, energy, and attention are finite. Achievement and humanity share one week. The user writes the definition of success.</p></section>
 
 <section><h2>Priority 0 agents</h2>{ARCH_SVG}<p>8 specialist live calls (measured) or labeled demo fixtures.</p></section>
 
-<section><h2>Cost (measured, live only)</h2><p style="font-size:.58em">One Priority 0 live run, Nov 23 · 5:37 PM ET · gpt-6-luna (OpenAI direct; course Portkey 401) · 8 calls · 4,283 input / 0 cached / 5,387 output · <strong>$0.00312</strong> · 49.1 s. Radar / Contextual / Stacking: <strong>demo only</strong> (no new token counts).</p><img alt="Agent Activity after live run" style="max-height:220px;width:auto;border:1px solid #3F6F7A" src="data:image/png;base64,{LIVE_B64}"/></section>
+<section><h2>Cost (measured)</h2><p style="font-size:.55em">{cost_line}</p></section>
 
 <section><h2>Strategic Radar</h2><ul><li>Discovery feed: <strong>Simulated</strong> illustrative fixtures</li><li>Research-to-action (draft not sent, ICS, follow-up): <strong>Operational</strong></li><li>Background monitoring: <strong>Planned</strong></li><li>One <strong>VERIFIED</strong> Yale SOM address; dashed edges = hypothetical introductions (not real relationships)</li></ul><img alt="Radar feed" style="max-height:200px;border:1px solid #3F6F7A" src="data:image/png;base64,{modules['radar_feed']}"/></section>
 
@@ -184,7 +209,7 @@ def build_slides() -> str:
 
 <section><h2>Safety</h2><p>Injection quarantine · REVIEW_ALL gate · no fake insurer calls · hypothetical graph edges labeled</p></section>
 
-<section><h2>Limits</h2><p>No pilot users · live tokens measured once (Priority 0) · insurer CRM Network Career planned · public repo</p></section>
+<section><h2>Limits</h2><p>Life Mandate is editable. Discovery text is a labeled dataset, not live search. Email, purchases, and the insurer stay simulated. Background monitoring is planned. Not a commercial product.</p></section>
 
 <section><h2>Run it</h2><p><code>streamlit run app.py</code> · <code>APP_MODE=demo</code></p><p><a href="{REPO}">{REPO}</a></p></section>
 

@@ -8,6 +8,7 @@ from agents import radar, specialists
 from agents.base import BaseAgent
 from agents.contextual_agents import ContextualBundlingAnalyst, ContextualScout
 from agents.life_strategists import LIFE_STRATEGIST_AGENTS
+from agents.office_agents import DiscoveryChooserAgent, QualityAuditorAgent, StrengthGapAgent
 
 
 @dataclass(frozen=True)
@@ -83,6 +84,25 @@ AGENT_REGISTRY: tuple[AgentEntry, ...] = (
     *(
         AgentEntry(cls, "Opportunity Stacking", "Simulated", _STACKING_NOTE)
         for cls in LIFE_STRATEGIST_AGENTS
+    ),
+    AgentEntry(
+        StrengthGapAgent,
+        "Life Mandate",
+        "Operational",
+        "SWOT/TOWS with evidence ids. No diagnosis, no flattery. User can reject the note. "
+        "Not called on every Priority 0 request.",
+    ),
+    AgentEntry(
+        DiscoveryChooserAgent,
+        "Life Mandate",
+        "Operational",
+        "Chooses among a labeled dataset. The winner is not hardcoded. Not live web search.",
+    ),
+    AgentEntry(
+        QualityAuditorAgent,
+        "Life Mandate",
+        "Operational",
+        "Independent reviewer plus deterministic checks. Does not send email or rewrite the mission.",
     ),
 )
 
