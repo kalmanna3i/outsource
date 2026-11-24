@@ -1,46 +1,44 @@
-"""Executive visual theme: deep navy, warm ivory, muted teal."""
+"""Dark workspace: ink on cards, sage and champagne as the only accents."""
 
 CUSTOM_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Source+Sans+3:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600&display=swap');
 
 :root {
-  --navy: #0B1F33;
-  --navy-2: #14304A;
-  --ivory: #F7F3EC;
-  --teal: #3F6F7A;
-  --teal-soft: #D7E4E7;
-  --ink: #1A2430;
-  --muted: #5C6B7A;
-  --line: #D9D2C5;
-  --warn: #8A5A2B;
+  --bg: #090F18;
+  --card: #101923;
+  --text: #E9EDF2;
+  --muted: #9AABBB;
+  --sage: #83B7A1;
+  --champagne: #B5A083;
+  --line: #243044;
 }
 
 .stApp {
-  background: var(--ivory);
-  color: var(--ink);
-  color-scheme: light;
+  background: var(--bg);
+  color: var(--text);
+  color-scheme: dark;
   font-family: 'Source Sans 3', sans-serif;
 }
 
-/* Ivory surfaces keep dark text. Dark-mode Streamlit otherwise paints
-   fields brown (#2D2B27) while this rule's ink color stays on the text. */
 [data-testid="stMain"] [data-testid="stWidgetLabel"],
 [data-testid="stMain"] [data-testid="stWidgetLabel"] * {
-  color: var(--ink) !important;
+  color: var(--text) !important;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
 }
 [data-testid="stMain"] [data-testid="stTextAreaRootElement"],
 [data-testid="stMain"] [data-testid="stTextInputRootElement"],
 [data-testid="stMain"] [data-testid="stNumberInputContainer"] {
-  background-color: #FFFDF8 !important;
-  color: var(--ink) !important;
+  background-color: var(--card) !important;
+  color: var(--text) !important;
 }
 [data-testid="stMain"] textarea,
 [data-testid="stMain"] input:not([type="checkbox"]):not([type="radio"]) {
   background-color: transparent;
-  color: var(--ink) !important;
-  -webkit-text-fill-color: var(--ink) !important;
-  caret-color: var(--ink);
+  color: var(--text) !important;
+  -webkit-text-fill-color: var(--text) !important;
+  caret-color: var(--text);
 }
 [data-testid="stMain"] textarea::placeholder,
 [data-testid="stMain"] input::placeholder {
@@ -48,142 +46,191 @@ CUSTOM_CSS = """
   -webkit-text-fill-color: var(--muted) !important;
 }
 
-h1, h2, h3, .brand-title {
-  font-family: 'Cormorant Garamond', Georgia, serif !important;
-  letter-spacing: 0.01em;
+h1, h2, h3, [data-testid="stHeading"], [data-testid="stHeading"] * {
+  font-family: 'Source Sans 3', sans-serif !important;
+  font-weight: 500 !important;
+  color: var(--text);
+  letter-spacing: 0;
 }
 
-.brand-wrap {
-  padding: 1.4rem 1.6rem 1.2rem 1.6rem;
-  margin-bottom: 1.2rem;
-  border-radius: 6px;
-  background:
-    radial-gradient(1200px 500px at 10% -10%, #1A3A55 0%, transparent 55%),
-    radial-gradient(900px 400px at 100% 0%, #2C5560 0%, transparent 45%),
-    linear-gradient(180deg, #0B1F33 0%, #10263A 100%);
+[data-testid="stHeading"] h1 { font-size: 1.25rem !important; }
+[data-testid="stHeading"] h2 { font-size: 1.02rem !important; }
+[data-testid="stHeading"] h3, [data-testid="stHeading"] h4 { font-size: 0.92rem !important; }
+
+.life-headline {
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
+  font-size: 1.2rem;
+  color: var(--text);
+  margin: 0 0 0.25rem;
 }
-.brand-title {
-  font-size: 2.6rem;
-  color: #F7F3EC;
-  margin: 0;
-  font-weight: 600;
+.life-mission {
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  font-size: 0.84rem;
+  color: var(--muted);
+  margin: 0.15rem 0 0.55rem;
+  max-width: 40rem;
+  line-height: 1.4;
 }
-.brand-tag {
-  color: #D7E4E7;
-  font-size: 1.05rem;
-  margin-top: 0.2rem;
+.metric-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.7rem;
 }
-.mode-pill {
-  display: inline-block;
-  margin-top: 0.75rem;
-  padding: 0.25rem 0.7rem;
-  border: 1px solid #D7E4E7;
-  color: #F7F3EC;
-  font-size: 0.8rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.panel {
-  background: rgba(247, 243, 236, 0.96);
+.metric-card {
+  background: var(--card);
   border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.38rem 0.6rem 0.32rem;
+  min-width: 6.6rem;
+}
+.metric-card .k {
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.metric-card .v {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.25;
+}
+.metric-card .s {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--text);
   padding: 1rem 1.1rem;
   margin-bottom: 0.8rem;
 }
-.panel h3 {
-  color: var(--navy);
-  margin-top: 0;
-}
+.panel h3 { color: var(--text); margin-top: 0; }
 .kpi {
-  font-size: 1.6rem;
-  color: var(--navy);
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.25rem;
+  color: var(--text);
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
 }
 .muted { color: var(--muted); font-size: 0.92rem; }
-.status-op { color: #1F5C45; font-weight: 600; }
-.status-sim { color: var(--warn); font-weight: 600; }
-.status-plan { color: var(--muted); font-weight: 600; }
+.status-op { color: var(--sage); font-weight: 500; }
+.status-sim { color: var(--champagne); font-weight: 500; }
+.status-plan { color: var(--muted); font-weight: 500; }
 .stButton>button {
-  background: var(--navy);
-  color: #F7F3EC;
-  border: none;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--line);
   border-radius: 2px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
 }
 .stButton>button:hover {
-  background: var(--teal);
-  color: white;
+  border-color: var(--sage);
+  color: var(--text);
 }
 section[data-testid="stSidebar"] {
-  background: #0C1D2B;
+  background: var(--bg);
+  border-right: 1px solid var(--line);
+}
+section[data-testid="stSidebar"] {
+  font-family: 'Source Sans 3', sans-serif;
 }
 section[data-testid="stSidebar"] * {
-  color: #F7F3EC !important;
+  color: var(--text) !important;
+}
+section[data-testid="stSidebar"] [data-testid="stIconMaterial"] {
+  font-family: "Material Symbols Rounded", "Material Symbols Outlined" !important;
+  font-weight: 400 !important;
 }
 section[data-testid="stSidebar"] .north-star-kicker {
-  color: #B5A083 !important;
+  color: var(--champagne) !important;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.75rem;
+  font-weight: 500;
   margin: 0.2rem 0 0.25rem;
 }
 section[data-testid="stSidebar"] .north-star {
-  color: #F8F7F3 !important;
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.15rem;
-  line-height: 1.35;
+  color: var(--text) !important;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 400;
+  font-size: 0.95rem;
+  line-height: 1.4;
   margin: 0 0 0.8rem;
 }
 section[data-testid="stSidebar"] .mode-line {
-  color: #F8F7F3 !important;
+  color: var(--muted) !important;
   font-size: 0.85rem;
+  font-weight: 400;
   letter-spacing: 0.02em;
   margin-top: 0.6rem;
 }
 section[data-testid="stSidebar"] .stButton > button,
 section[data-testid="stSidebar"] button[data-testid^="stBaseButton"] {
   background: transparent;
-  color: #F7F3EC;
+  color: var(--text);
   border: none;
   border-left: 3px solid transparent;
   border-radius: 2px;
   text-align: left !important;
   justify-content: flex-start !important;
+  font-weight: 400 !important;
+  font-size: 0.82rem !important;
+  min-height: 1.55rem;
+  padding-top: 0.05rem;
+  padding-bottom: 0.05rem;
   padding-left: 0.7rem;
+}
+section[data-testid="stSidebar"] [data-testid="stExpander"] details summary {
+  font-size: 0.78rem;
+  padding-top: 0.28rem;
+  padding-bottom: 0.28rem;
 }
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"],
 section[data-testid="stSidebar"] button[data-testid="stBaseButton-primary"] * {
-  color: #B5A083 !important;
+  color: var(--champagne) !important;
   background: transparent;
-  border-left-color: #B5A083;
+  border-left-color: var(--champagne);
+  font-weight: 500 !important;
 }
 div[data-testid="stSidebarNav"] { display: none; }
 .opp-card {
-  background: #FFFDF8;
+  background: var(--card);
   border: 1px solid var(--line);
-  border-left: 4px solid var(--teal);
+  border-left: 4px solid var(--sage);
+  color: var(--text);
   padding: 0.9rem 1.1rem;
   margin-bottom: 0.9rem;
 }
-.opp-card.distraction { border-left-color: var(--warn); opacity: 0.85; }
-.opp-card.review { border-left-color: #9AA7B2; }
+.opp-card.distraction { border-left-color: var(--champagne); }
+.opp-card.review { border-left-color: var(--muted); }
 .opp-cat {
-  font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal);
+  font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sage);
 }
 .opp-title {
-  font-family: 'Cormorant Garamond', Georgia, serif; font-size: 1.35rem; color: var(--navy);
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
+  font-size: 1.15rem;
+  color: var(--text);
 }
 .opp-grid { display: grid; grid-template-columns: 5.5rem 1fr; gap: 0.15rem 0.6rem; font-size: 0.9rem; margin-top: 0.4rem; }
-.opp-grid b { color: var(--navy); font-weight: 600; }
+.opp-grid b { color: var(--text); font-weight: 500; }
 .badge {
   display: inline-block; padding: 0.1rem 0.5rem; margin-right: 0.35rem; font-size: 0.72rem;
   letter-spacing: 0.05em; border: 1px solid; border-radius: 2px;
 }
-.badge-sim { color: var(--warn); border-color: var(--warn); }
-.badge-ver { color: #1F5C45; border-color: #1F5C45; }
+.badge-sim { color: var(--champagne); border-color: var(--champagne); }
+.badge-ver { color: var(--sage); border-color: var(--sage); }
 .badge-unv { color: var(--muted); border-color: var(--muted); }
-.badge-genuine { color: #F7F3EC; background: var(--teal); border-color: var(--teal); }
-.badge-distraction { color: #F7F3EC; background: var(--warn); border-color: var(--warn); }
-.badge-review { color: var(--navy); background: var(--teal-soft); border-color: var(--teal-soft); }
-.next-action { margin-top: 0.5rem; color: var(--navy); font-weight: 600; }
+.badge-genuine { color: #090F18; background: var(--sage); border-color: var(--sage); }
+.badge-distraction { color: #090F18; background: var(--champagne); border-color: var(--champagne); }
+.badge-review { color: var(--text); background: transparent; border-color: var(--muted); }
+.next-action { margin-top: 0.5rem; color: var(--text); font-weight: 500; }
 </style>
 """
 

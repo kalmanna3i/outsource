@@ -2,15 +2,28 @@
 
 from __future__ import annotations
 
+import html
 from datetime import datetime, timezone
 
 import streamlit as st
 
 from core.config import get_settings
 from core.llm import LLMClient
-from database.db import load_assessments, load_daily_checkin, save_assessments, save_daily_checkin
+from database.db import (
+    load_aspirations,
+    load_assessments,
+    load_daily_checkin,
+    save_assessments,
+    save_daily_checkin,
+)
 from services.radar_graph import figure as network_figure
-from services.universe import active_dimensions, ask_decision, daily_plan_text
+from services.universe import (
+    active_dimensions,
+    ask_decision,
+    assessed_scores,
+    capability_gaps,
+    daily_plan_text,
+)
 from ui.living_universe import render_living_universe
 from ui.strategic_charts import (
     capability_gap_chart,
@@ -26,22 +39,46 @@ def _today() -> str:
 
 
 def render_today(mandate, blueprint, workflow) -> None:
-    st.markdown(f"### {mandate.mission or 'No mission is saved yet.'}")
-    assessments = load_assessments()
-    render_living_universe(mandate, blueprint, assessments)
+    st.markdown('<p class="life-headline">Your life, in motion</p>', unsafe_allow_html=True)
     _question(mandate, workflow)
+    mission = (mandate.mission or "").strip() or "No mission is saved yet."
+    st.markdown(f'<p class="life-mission">{html.escape(mission)}</p>', unsafe_allow_html=True)
+    assessments = load_assessments()
+    _stored_cards(mandate, blueprint, assessments)
+    render_living_universe(mandate, blueprint, assessments)
     _checkin()
     _assessments(mandate, blueprint, assessments)
     _charts(mandate, blueprint, assessments)
 
 
+def _stored_cards(mandate, blueprint, assessments: dict[str, int]) -> None:
+    """Compact cards for stored records only. No sparklines and no filled-in series."""
+    names = {item["key"]: item["name"] for item in active_dimensions(mandate, blueprint)}
+    cards = [
+        ("Saved mandate", f"{mandate.time_budget_hours_week:g} h/wk", "Time budget"),
+        ("Saved mandate", f"${mandate.money_budget_usd_month:g}/mo", "Money budget"),
+    ]
+    checkin = load_daily_checkin(_today())
+    if checkin:
+        cards.append(("Today's check-in", f"{int(checkin['energy'])}/5", "Energy"))
+    for key, score in assessments.items():
+        cards.append(("Saved assessment", f"{int(score)}/10", names.get(key, key)))
+    for key, score in load_aspirations().items():
+        cards.append(("Aspiration", f"{int(score)}/10", names.get(key, key)))
+    bits = []
+    for source, value, label in cards:
+        bits.append(
+            "<div class='metric-card'>"
+            f"<div class='k'>{html.escape(source)}</div>"
+            f"<div class='v'>{html.escape(value)}</div>"
+            f"<div class='s'>{html.escape(label)}</div>"
+            "</div>"
+        )
+    st.markdown(f"<div class='metric-row'>{''.join(bits)}</div>", unsafe_allow_html=True)
+
+
 def _question(mandate, workflow) -> None:
-    st.markdown("#### Ask the office")
-    st.caption(
-        "One decision call when you click Ask. A rerun does not call again. "
-        "The answer uses the office recommendation already computed from the mandate."
-    )
-    question = st.text_input("Decision question", key="universe_question")
+    question = st.text_input("What would you like to explore today?", key="universe_question")
     asked = st.session_state.setdefault("universe_answers", {})
     if st.button("Ask the office"):
         text = question.strip()
@@ -64,11 +101,6 @@ def _question(mandate, workflow) -> None:
         packet = asked[shown]
         answer = packet["result"].get("answer") or packet["result"].get("summary") or ""
         st.write(answer)
-        st.caption(
-            f"Call {packet['call_id']} · mode {packet['mode']} · "
-            f"{packet['result'].get('source', 'decision path')}. "
-            "Asking the same question again does not make another call."
-        )
 
 
 def _checkin() -> None:
@@ -133,11 +165,14 @@ def _assessments(mandate, blueprint, assessments: dict[str, int]) -> None:
 
 def _charts(mandate, blueprint, assessments: dict[str, int]) -> None:
     dimensions = active_dimensions(mandate, blueprint)
-    st.markdown("#### Life radar")
-    st.plotly_chart(life_radar(dimensions, assessments), use_container_width=True)
-    st.markdown("#### Capability gaps")
-    st.plotly_chart(capability_gap_chart(dimensions, assessments), use_container_width=True)
-    st.caption("Gap = stored goal importance minus your saved assessment. Unsaved dimensions are omitted.")
+    if len(assessed_scores(dimensions, assessments)) >= 3:
+        st.markdown("#### Life radar")
+        st.plotly_chart(life_radar(dimensions, assessments), use_container_width=True)
+    gaps = capability_gaps(dimensions, assessments)
+    if gaps:
+        st.markdown("#### Capability gaps")
+        st.plotly_chart(capability_gap_chart(dimensions, assessments), use_container_width=True)
+        st.caption("Gap = stored goal importance minus your saved assessment. Unsaved dimensions are omitted.")
 
     st.markdown("#### Opportunity heatmap")
     heat, heat_note = opportunity_heatmap(mandate)

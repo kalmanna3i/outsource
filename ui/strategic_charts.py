@@ -1,4 +1,4 @@
-"""Plotly charts for the homepage. Transparent paper, ink on ivory, fixtures labeled."""
+"""Plotly charts for the dark homepage. Fixtures stay labeled. Missing scores stay missing."""
 
 from __future__ import annotations
 
@@ -15,19 +15,20 @@ from services.universe import (
     spending_snapshot,
 )
 
-NAVY = "#142438"
-IVORY = "#F8F7F3"
-SAGE = "#496E65"
+NAVY = "#9AABBB"
+IVORY = "#101923"
+SAGE = "#83B7A1"
 CHAMPAGNE = "#B5A083"
-INK = "#1A2430"
+INK = "#E9EDF2"
+GRID = "#243044"
 
 
-def _layout(fig: go.Figure, height: int = 380) -> go.Figure:
+def _layout(fig: go.Figure, height: int = 300) -> go.Figure:
     fig.update_layout(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(color=INK, family="Source Sans 3, sans-serif"),
-        margin=dict(l=24, r=16, t=36, b=24),
+        font=dict(color=INK, family="Source Sans 3, sans-serif", size=11),
+        margin=dict(l=16, r=10, t=20, b=16),
         height=height,
         legend=dict(orientation="h", y=-0.2),
     )
@@ -66,7 +67,7 @@ def dimension_levels(current: int | None, aspiration: int | None) -> go.Figure:
         values.append(aspiration)
         colors.append(CHAMPAGNE)
     fig = go.Figure(go.Bar(x=names, y=values, marker_color=colors, name="Saved"))
-    fig.update_yaxes(range=[0, 10], title="0–10", gridcolor="#E6E0D6")
+    fig.update_yaxes(range=[0, 10], title="0–10", gridcolor=GRID)
     return _layout(fig, height=320)
 
 
@@ -80,11 +81,11 @@ def history_line(points: list[dict[str, Any]]) -> go.Figure:
             y=[point["score"] for point in points],
             mode="lines+markers" if len(points) > 1 else "markers",
             name="Personal history",
-            line=dict(color=SAGE, width=2),
+            line=dict(color=SAGE, width=1),
             marker=dict(color=NAVY, size=10),
         )
     )
-    fig.update_yaxes(range=[0, 10], title="Saved score", gridcolor="#E6E0D6")
+    fig.update_yaxes(range=[0, 10], title="Saved score", gridcolor=GRID)
     fig.update_xaxes(type="category", title="Saved at")
     return _layout(fig, height=320)
 
@@ -109,8 +110,8 @@ def portfolio_radar(
             theta=names + [names[0]],
             fill="toself",
             name="Personal history",
-            line=dict(color=SAGE, width=2),
-            fillcolor="rgba(73,110,101,0.35)",
+            line=dict(color=SAGE, width=1),
+            fillcolor="rgba(131,183,161,0.28)",
         )
     )
     by_name = {dimension["name"]: dimension["key"] for dimension in dimensions}
@@ -127,13 +128,13 @@ def portfolio_radar(
                 r=aspiration_values + [aspiration_values[0]],
                 theta=names + [names[0]],
                 name="Aspiration",
-                line=dict(color=CHAMPAGNE, width=2),
+                line=dict(color=CHAMPAGNE, width=1),
             )
         )
     fig.update_layout(
         polar=dict(
             bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(range=[0, 10], color=NAVY, gridcolor="#D9D2C5", dtick=2),
+            radialaxis=dict(range=[0, 10], color=NAVY, gridcolor=GRID, dtick=2),
             angularaxis=dict(color=NAVY),
         ),
     )
@@ -152,14 +153,14 @@ def life_radar(dimensions: list[dict[str, Any]], assessments: dict[str, int]) ->
             theta=names + [names[0]],
             fill="toself",
             name="Saved assessment",
-            line=dict(color=SAGE, width=2),
-            fillcolor="rgba(73,110,101,0.35)",
+            line=dict(color=SAGE, width=1),
+            fillcolor="rgba(131,183,161,0.28)",
         )
     )
     fig.update_layout(
         polar=dict(
             bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(range=[0, 10], color=NAVY, gridcolor="#D9D2C5", dtick=2),
+            radialaxis=dict(range=[0, 10], color=NAVY, gridcolor=GRID, dtick=2),
             angularaxis=dict(color=NAVY),
         ),
         showlegend=False,
@@ -190,7 +191,7 @@ def capability_gap_chart(dimensions: list[dict[str, Any]], assessments: dict[str
             marker_color=CHAMPAGNE,
         )
     )
-    fig.update_layout(barmode="group", yaxis=dict(range=[0, 10], title="0–10", gridcolor="#E6E0D6"))
+    fig.update_layout(barmode="group", yaxis=dict(range=[0, 10], title="0–10", gridcolor=GRID))
     return _layout(fig)
 
 
@@ -201,13 +202,13 @@ def opportunity_heatmap(mandate: LifeMandate) -> tuple[go.Figure, str]:
             z=matrix["z"],
             x=matrix["themes"],
             y=matrix["labels"],
-            colorscale=[[0, IVORY], [0.45, SAGE], [1, NAVY]],
+            colorscale=[[0, "#101923"], [0.5, SAGE], [1, "#E9EDF2"]],
             colorbar=dict(title="score"),
             hovertemplate="%{y}<br>%{x}: %{z}<extra></extra>",
         )
     )
     fig.update_yaxes(autorange="reversed")
-    return _layout(fig, height=460), matrix["label"]
+    return _layout(fig, height=340), matrix["label"]
 
 
 def opportunity_bubbles(mandate: LifeMandate) -> tuple[go.Figure, str]:
@@ -238,9 +239,9 @@ def opportunity_bubbles(mandate: LifeMandate) -> tuple[go.Figure, str]:
                 ),
             )
         )
-    fig.update_xaxes(title="Weekly cash on the labeled catalog ($)", gridcolor="#E6E0D6")
-    fig.update_yaxes(title="Strategic value", gridcolor="#E6E0D6")
-    return _layout(fig, height=420), "Labeled catalog fixtures. Marker size is hours. Not a market quote."
+    fig.update_xaxes(title="Weekly cash on the labeled catalog ($)", gridcolor=GRID)
+    fig.update_yaxes(title="Strategic value", gridcolor=GRID)
+    return _layout(fig, height=300), "Labeled catalog fixtures. Marker size is hours. Not a market quote."
 
 
 def spending_comparison(mandate: LifeMandate, hours: float, money: float) -> tuple[go.Figure, str]:
@@ -249,11 +250,11 @@ def spending_comparison(mandate: LifeMandate, hours: float, money: float) -> tup
         go.Bar(
             x=[item["label"] for item in snap["selected"]],
             y=[item["cash_usd"] for item in snap["selected"]],
-            marker_color=[NAVY if item["mandatory"] else SAGE for item in snap["selected"]],
+            marker_color=[CHAMPAGNE if item["mandatory"] else SAGE for item in snap["selected"]],
             name="Weekly cash",
         )
     )
-    fig.update_yaxes(title="Weekly cash ($)", gridcolor="#E6E0D6")
+    fig.update_yaxes(title="Weekly cash ($)", gridcolor=GRID)
     note = (
         f"{snap['label']} Weekly envelope ${snap['weekly_cash_envelope']} "
         f"leaves ${snap['weekly_cash_left']}. Unscheduled hours: {snap['hours_left_unscheduled']}. "
@@ -261,4 +262,4 @@ def spending_comparison(mandate: LifeMandate, hours: float, money: float) -> tup
         f"(make {snap['make_hours']}h, buy ${snap['buy_cash']} plus {snap['buy_hours']}h). "
         "Changing the budget fields above recalculates this. It does not spend money."
     )
-    return _layout(fig, height=380), note
+    return _layout(fig, height=280), note

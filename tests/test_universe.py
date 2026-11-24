@@ -132,3 +132,7 @@ def test_universe_respects_reduced_motion_and_saved_score(tmp_path: Path, monkey
     assert "Pause" in html
     assert "Saved assessment 4 of 10" in html
     assert "86%" not in html
+    keys = {node["key"] for node in nodes}
+    assert {"friendship", "coursework", "relationships", "academic"} <= keys
+    assert "Intellectual" in html
+    assert "Georgia" not in html

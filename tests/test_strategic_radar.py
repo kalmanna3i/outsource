@@ -171,6 +171,26 @@ def test_graph_never_marks_hypothetical_as_verified():
     assert styles[EDGE_STYLE["VERIFIED"]["label"]] == "solid"
     assert styles[EDGE_STYLE["HYPOTHETICAL"]["label"]] == "dash"
 
+    from services.radar_graph import CANVAS_H, CANVAS_W, _MARGIN, label_layout
+
+    boxes = label_layout(graph)
+    assert len(boxes) == len(graph.nodes)
+    for box in boxes:
+        assert box["x"] >= _MARGIN - 1
+        assert box["y"] >= _MARGIN - 1
+        assert box["x"] + box["w"] <= CANVAS_W - _MARGIN + 1
+        assert box["y"] + box["h"] <= CANVAS_H - _MARGIN + 1
+    for i, box in enumerate(boxes):
+        for other in boxes[i + 1:]:
+            separated = (
+                abs(box["cx"] - other["cx"]) >= (box["w"] + other["w"]) / 2
+                or abs(box["cy"] - other["cy"]) >= (box["h"] + other["h"]) / 2
+            )
+            assert separated, (box["plain"], other["plain"])
+    plain = " ".join(box["plain"] for box in boxes)
+    assert "Yale School of Management" in plain
+    assert "Goal: meaningful relationships" in plain
+
 
 def test_research_to_action_produces_ics_draft_followup_and_sends_nothing(engine, blueprint):
     run = engine.discover(blueprint)

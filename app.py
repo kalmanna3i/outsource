@@ -51,18 +51,6 @@ init_db()
 settings = get_settings()
 
 
-def mode_label() -> str:
-    m = settings.effective_mode
-    if settings.llm_mode == "live" and m == "demo":
-        return "DEMO (LLM_MODE=live but no API key — labeled fixtures)"
-    integrations = (
-        "integrations simulated"
-        if not settings.external_actions_allowed
-        else "integrations live"
-    )
-    return f"{m.upper()} · {integrations}"
-
-
 def ensure_session() -> None:
     if "workflow" not in st.session_state:
         st.session_state.workflow = None
@@ -75,18 +63,6 @@ ensure_session()
 
 def header() -> None:
     st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
-    mandate = load_mandate()
-    st.markdown(
-        f"""
-        <div class="brand-wrap">
-          <div class="brand-title">{mandate.display_name}</div>
-          <div class="brand-tag">{mandate.philosophy}</div>
-          <div class="brand-tag">{mandate.promise}</div>
-          <div class="mode-pill">Mode: {mode_label()} · Kay Al Mannai · Yale MGT 409</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
 
 
 # Labels only where a page already exists. Same page may be reached by more than one label.
