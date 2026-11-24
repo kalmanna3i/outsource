@@ -32,6 +32,7 @@ from database.db import (
 )
 from services.finance import project_cashflow
 from services.workflow import WorkflowEngine
+from ui.benchmark_page import render_benchmark
 from ui.contextual_page import render_contextual
 from ui.dashboard import render_today
 from ui.mandate_page import render_mandate
@@ -116,6 +117,7 @@ NAV_GROUPS: list[tuple[str, list[tuple[str, str]]]] = [
         ("Calendar", "My Calendar"),
     ]),
     ("Progress", [
+        ("Life dimensions", "Life Dimensions"),
         ("Financial future", "My Financial Future"),
     ]),
 ]
@@ -632,6 +634,7 @@ def main() -> None:
         "My People": page_people,
         "My Network": page_network,
         "My Career": page_career,
+        "Life Dimensions": render_benchmark,
         "My Financial Future": page_finance,
         "Agent Activity": page_activity,
         "Contextual Opportunities": render_contextual,

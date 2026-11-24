@@ -50,6 +50,96 @@ def _empty(message: str) -> go.Figure:
     return _layout(fig, height=220)
 
 
+def dimension_levels(current: int | None, aspiration: int | None) -> go.Figure:
+    """Current self-assessment and saved aspiration. No bar is drawn for a missing score."""
+    if current is None and aspiration is None:
+        return _empty("Nothing is saved for this dimension yet.")
+    names: list[str] = []
+    values: list[int] = []
+    colors: list[str] = []
+    if current is not None:
+        names.append("Personal history")
+        values.append(current)
+        colors.append(SAGE)
+    if aspiration is not None:
+        names.append("Aspiration")
+        values.append(aspiration)
+        colors.append(CHAMPAGNE)
+    fig = go.Figure(go.Bar(x=names, y=values, marker_color=colors, name="Saved"))
+    fig.update_yaxes(range=[0, 10], title="0–10", gridcolor="#E6E0D6")
+    return _layout(fig, height=320)
+
+
+def history_line(points: list[dict[str, Any]]) -> go.Figure:
+    """One point per save. Dates that were never saved are not added."""
+    if not points:
+        return _empty("No saved history for this dimension.")
+    fig = go.Figure(
+        go.Scatter(
+            x=[point["recorded_at"] for point in points],
+            y=[point["score"] for point in points],
+            mode="lines+markers" if len(points) > 1 else "markers",
+            name="Personal history",
+            line=dict(color=SAGE, width=2),
+            marker=dict(color=NAVY, size=10),
+        )
+    )
+    fig.update_yaxes(range=[0, 10], title="Saved score", gridcolor="#E6E0D6")
+    fig.update_xaxes(type="category", title="Saved at")
+    return _layout(fig, height=320)
+
+
+def portfolio_radar(
+    dimensions: list[dict[str, Any]],
+    assessments: dict[str, int],
+    aspirations: dict[str, int],
+) -> go.Figure:
+    """Saved self-assessments, plus aspiration only where the user stored a target."""
+    from services.benchmark import saved_radar_scores
+
+    current = saved_radar_scores(dimensions, assessments)
+    if len(current) < 3:
+        return _empty("Save at least three self-assessments to draw the portfolio radar.")
+    names = [name for name, _score in current]
+    values = [score for _name, score in current]
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatterpolar(
+            r=values + [values[0]],
+            theta=names + [names[0]],
+            fill="toself",
+            name="Personal history",
+            line=dict(color=SAGE, width=2),
+            fillcolor="rgba(73,110,101,0.35)",
+        )
+    )
+    by_name = {dimension["name"]: dimension["key"] for dimension in dimensions}
+    aspiration_values = []
+    for name in names:
+        key = by_name.get(name)
+        if key is None or key not in aspirations:
+            aspiration_values = []
+            break
+        aspiration_values.append(int(aspirations[key]))
+    if aspiration_values:
+        fig.add_trace(
+            go.Scatterpolar(
+                r=aspiration_values + [aspiration_values[0]],
+                theta=names + [names[0]],
+                name="Aspiration",
+                line=dict(color=CHAMPAGNE, width=2),
+            )
+        )
+    fig.update_layout(
+        polar=dict(
+            bgcolor="rgba(0,0,0,0)",
+            radialaxis=dict(range=[0, 10], color=NAVY, gridcolor="#D9D2C5", dtick=2),
+            angularaxis=dict(color=NAVY),
+        ),
+    )
+    return _layout(fig)
+
+
 def life_radar(dimensions: list[dict[str, Any]], assessments: dict[str, int]) -> go.Figure:
     scored = assessed_scores(dimensions, assessments)
     if len(scored) < 3:

@@ -407,9 +407,57 @@ def load_daily_checkin(day: str, user_id: str = "local") -> dict | None:
 
 
 def save_assessments(scores: dict[str, int], user_id: str = "local") -> None:
-    """Saved 0–10 dimension assessments. Missing keys are not filled in."""
+    """Saved 0–10 dimension assessments. Missing keys are not filled in.
+
+    Each save appends one history row. Days between saves are not filled in.
+    """
     clean = {str(key): int(value) for key, value in scores.items()}
     set_setting_json(f"assessments:{user_id}", json.dumps(clean))
+    history = load_assessment_history(user_id)
+    history.append({"recorded_at": utc_now().isoformat(), "scores": clean})
+    set_setting_json(f"assessment_history:{user_id}", json.dumps(history))
+
+
+def load_assessment_history(user_id: str = "local") -> list[dict]:
+    raw = get_setting_json(f"assessment_history:{user_id}")
+    if not raw:
+        return []
+    data = json.loads(raw)
+    if not isinstance(data, list):
+        return []
+    rows = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        recorded_at = item.get("recorded_at")
+        scores = item.get("scores")
+        if not recorded_at or not isinstance(scores, dict):
+            continue
+        rows.append({"recorded_at": str(recorded_at), "scores": {str(k): int(v) for k, v in scores.items()}})
+    return rows
+
+
+def save_aspirations(scores: dict[str, int], user_id: str = "local") -> None:
+    """Desired targets the user saved. Unset dimensions stay unset."""
+    clean = {str(key): int(value) for key, value in scores.items()}
+    set_setting_json(f"aspirations:{user_id}", json.dumps(clean))
+
+
+def load_aspirations(user_id: str = "local") -> dict[str, int]:
+    raw = get_setting_json(f"aspirations:{user_id}")
+    if not raw:
+        return {}
+    data = json.loads(raw)
+    if not isinstance(data, dict):
+        return {}
+    out: dict[str, int] = {}
+    for key, value in data.items():
+        try:
+            number = int(value)
+        except (TypeError, ValueError):
+            continue
+        out[str(key)] = max(0, min(10, number))
+    return out
 
 
 def load_assessments(user_id: str = "local") -> dict[str, int]:
